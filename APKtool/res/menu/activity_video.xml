@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu
+  xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item android:icon="@drawable/ic_baseline_star_outline_24" android:id="@id/configFavorite" android:title="@string/text_favorite" app:showAsAction="ifRoom" />
+    <item android:icon="@drawable/ic_baseline_settings_24" android:id="@id/configVideo" android:title="@string/text_video_settings" app:showAsAction="always" />
+</menu>

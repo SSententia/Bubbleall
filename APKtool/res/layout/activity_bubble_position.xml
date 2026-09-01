@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout android:layout_width="match_parent" android:layout_height="match_parent"
+  xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto">
+    <com.google.android.material.floatingactionbutton.FloatingActionButton android:id="@id/finishActivity" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_margin="16.0dp" android:src="@drawable/ic_baseline_arrow_back_24" android:contentDescription="@string/app_name" app:backgroundTint="@color/white" app:elevation="2.0dp" app:fabSize="mini" />
+    <TextView android:textSize="25.0sp" android:textStyle="bold" android:textColor="#3d3d3d" android:id="@id/stateBubble" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/text_move_bubble_1" android:layout_centerInParent="true" android:fontFamily="sans-serif-condensed-medium" android:layout_marginStart="10.0dp" android:layout_marginEnd="10.0dp" />
+    <com.google.android.gms.ads.AdView android:id="@id/adBanner" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_alignParentBottom="true" android:layout_centerInParent="true" app:adSize="BANNER" app:adUnitId="@string/ad_banner_uid" />
+</RelativeLayout>

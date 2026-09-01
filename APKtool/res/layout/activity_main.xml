@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout android:background="@color/white" android:layout_width="match_parent" android:layout_height="match_parent"
+  xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto">
+    <androidx.core.widget.NestedScrollView android:layout_width="match_parent" android:layout_height="match_parent" android:layout_above="@id/adBanner">
+        <RelativeLayout android:paddingBottom="30.0dp" android:layout_width="match_parent" android:layout_height="wrap_content">
+            <TextView android:textSize="22.0sp" android:textStyle="bold" android:textColor="#3d3d3d" android:id="@id/titleApp" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="20.0dp" android:text="@string/app_name" android:layout_alignParentTop="true" android:layout_centerInParent="true" />
+            <FrameLayout android:id="@id/iconLayout" android:background="@drawable/background_bubble" android:layout_width="190.0dp" android:layout_height="190.0dp" android:layout_marginTop="30.0dp" android:layout_below="@id/titleApp" android:layout_centerInParent="true" android:contentDescription="@string/app_name" android:backgroundTint="#4d4d4d">
+                <ImageView android:layout_gravity="center" android:id="@id/buttonStart" android:layout_width="80.0dp" android:layout_height="80.0dp" android:src="@drawable/ic_baseline_play_arrow_24" android:contentDescription="@string/app_name" app:tint="@color/white" />
+            </FrameLayout>
+            <LinearLayout android:orientation="vertical" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="30.0dp" android:layout_below="@id/iconLayout">
+                <TextView android:textSize="15.0sp" android:textColor="@color/colorSecondText" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/text_themes" android:layout_marginStart="20.0dp" android:layout_marginEnd="20.0dp" />
+                <androidx.recyclerview.widget.RecyclerView android:layout_gravity="start|center" android:id="@id/colorList" android:clipToPadding="false" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="10.0dp" android:overScrollMode="never" android:paddingStart="20.0dp" android:paddingEnd="20.0dp" />
+                <TextView android:textSize="15.0sp" android:textColor="@color/colorSecondText" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="15.0dp" android:text="@string/text_size" android:layout_marginStart="20.0dp" android:layout_marginEnd="20.0dp" />
+                <androidx.recyclerview.widget.RecyclerView android:layout_gravity="start|center" android:id="@id/listSize" android:clipToPadding="false" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="10.0dp" android:overScrollMode="never" android:paddingStart="20.0dp" android:paddingEnd="20.0dp" />
+                <TextView android:textSize="15.0sp" android:textColor="@color/colorSecondText" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="15.0dp" android:text="@string/text_items" android:layout_marginStart="20.0dp" android:layout_marginEnd="20.0dp" />
+                <androidx.recyclerview.widget.RecyclerView android:layout_gravity="start|center" android:id="@id/itemsList" android:clipToPadding="false" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="10.0dp" android:overScrollMode="never" android:paddingStart="20.0dp" android:paddingEnd="20.0dp" />
+            </LinearLayout>
+        </RelativeLayout>
+    </androidx.core.widget.NestedScrollView>
+    <com.google.android.gms.ads.AdView android:id="@id/adBanner" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_alignParentBottom="true" android:layout_centerInParent="true" app:adSize="BANNER" app:adUnitId="@string/ad_banner_uid" />
+</RelativeLayout>

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView android:layout_width="match_parent" android:layout_height="match_parent"
+  xmlns:app="http://schemas.android.com/apk/res-auto" xmlns:android="http://schemas.android.com/apk/res/android">
+    <LinearLayout android:gravity="center|top" android:orientation="vertical" android:paddingTop="30.0dp" android:paddingBottom="30.0dp" android:layout_width="match_parent" android:layout_height="wrap_content">
+        <RelativeLayout android:background="@drawable/background_item_color" android:layout_width="80.0dp" android:layout_height="80.0dp">
+            <ImageView android:id="@id/iconWeb" android:layout_width="40.0dp" android:layout_height="40.0dp" android:src="@drawable/ic_web" android:layout_centerInParent="true" android:contentDescription="@string/app_name" />
+        </RelativeLayout>
+        <TextView android:textSize="17.0sp" android:textColor="@color/colorPrimaryText" android:ellipsize="end" android:id="@id/textWeb" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="8.0dp" android:text="@string/app_name" android:maxLines="1" android:lines="1" android:minLines="1" android:layout_marginStart="20.0dp" android:layout_marginEnd="20.0dp" />
+        <TextView android:textSize="16.0sp" android:textColor="@color/colorSecondText" android:ellipsize="end" android:id="@id/urlWeb" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/app_name" android:maxLines="1" android:lines="1" android:minLines="1" android:layout_marginStart="10.0dp" android:layout_marginEnd="10.0dp" />
+        <androidx.recyclerview.widget.RecyclerView android:id="@id/optionsMenuWeb" android:layout_width="match_parent" android:layout_height="wrap_content" android:overScrollMode="never" />
+        <com.alexmanzana.bubbleall.views.SwitchView android:id="@id/switchDesktop" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="10.0dp" app:text="@string/text_desktop" />
+    </LinearLayout>
+</ScrollView>

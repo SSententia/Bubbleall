@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.coordinatorlayout.widget.CoordinatorLayout android:layout_width="match_parent" android:layout_height="match_parent"
+  xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto">
+    <androidx.recyclerview.widget.RecyclerView android:id="@id/listMusic" android:layout_width="match_parent" android:layout_height="match_parent" />
+    <ProgressBar android:layout_gravity="center" android:id="@id/progressList" android:layout_width="wrap_content" android:layout_height="wrap_content" />
+    <RelativeLayout android:id="@id/sheetMusic" android:paddingTop="10.0dp" android:focusable="true" android:visibility="gone" android:clickable="true" android:layout_width="match_parent" android:layout_height="match_parent" app:behavior_hideable="false" app:behavior_peekHeight="62.0dp" app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior">
+        <LinearLayout android:orientation="vertical" android:id="@id/sheetPreview" android:layout_width="match_parent" android:layout_height="wrap_content">
+            <RelativeLayout android:layout_width="match_parent" android:layout_height="wrap_content">
+                <ImageView android:id="@id/imageMusicPreview" android:background="@drawable/background_music" android:padding="7.0dp" android:layout_width="40.0dp" android:layout_height="40.0dp" android:src="@drawable/ic_baseline_music_note_24" android:scaleType="centerCrop" android:layout_centerInParent="true" android:contentDescription="@string/app_name" android:layout_marginStart="10.0dp" android:layout_alignParentStart="true" />
+                <LinearLayout android:gravity="start|center" android:orientation="vertical" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_centerInParent="true" android:layout_marginStart="10.0dp" android:layout_marginEnd="10.0dp" android:layout_toStartOf="@id/buttonHideSheet" android:layout_toEndOf="@id/imageMusicPreview">
+                    <TextView android:textSize="16.0sp" android:textColor="@color/colorPrimaryText" android:ellipsize="end" android:id="@id/titleMusicPreview" android:layout_width="wrap_content" android:layout_height="wrap_content" android:maxLines="1" android:lines="1" android:minLines="1" android:layout_marginEnd="10.0dp" />
+                    <TextView android:textSize="14.0sp" android:textColor="@color/colorSecondText" android:ellipsize="end" android:id="@id/authorMusicPreview" android:layout_width="wrap_content" android:layout_height="wrap_content" android:maxLines="1" android:lines="1" android:minLines="1" />
+                </LinearLayout>
+                <ImageView android:id="@id/buttonHideSheet" android:layout_width="30.0dp" android:layout_height="30.0dp" android:src="@drawable/ic_baseline_keyboard_arrow_down_24" android:layout_centerInParent="true" android:contentDescription="@string/app_name" android:layout_marginEnd="20.0dp" android:layout_alignParentEnd="true" />
+            </RelativeLayout>
+            <View android:background="#cccccc" android:layout_width="match_parent" android:layout_height="1.0dp" android:layout_marginTop="10.0dp" />
+        </LinearLayout>
+        <RelativeLayout android:id="@id/sheetContent" android:layout_width="match_parent" android:layout_height="match_parent" android:layout_below="@id/sheetPreview">
+            <ImageView android:id="@id/imageMusic" android:layout_width="match_parent" android:layout_height="match_parent" android:scaleType="centerCrop" android:layout_above="@id/bottomControls" android:layout_alignParentTop="true" android:layout_centerInParent="true" android:contentDescription="@string/app_name" />
+            <LinearLayout android:orientation="vertical" android:id="@id/bottomControls" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="6.0dp" android:layout_marginBottom="10.0dp" android:layout_alignParentBottom="true">
+                <SeekBar android:id="@id/progressMusic" android:layout_width="match_parent" android:layout_height="wrap_content" />
+                <RelativeLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="2.0dp" android:layout_marginBottom="5.0dp">
+                    <TextView android:textSize="15.0sp" android:gravity="start" android:id="@id/currentTextMusic" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_centerInParent="true" android:textAlignment="textStart" android:layout_marginStart="10.0dp" android:layout_toStartOf="@id/durationTextMusic" android:layout_alignParentStart="true" />
+                    <TextView android:textSize="15.0sp" android:gravity="end" android:id="@id/durationTextMusic" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_centerInParent="true" android:textAlignment="textEnd" android:layout_marginEnd="10.0dp" android:layout_alignParentEnd="true" />
+                </RelativeLayout>
+                <RelativeLayout android:orientation="horizontal" android:paddingTop="5.0dp" android:paddingBottom="5.0dp" android:layout_width="match_parent" android:layout_height="wrap_content">
+                    <LinearLayout android:gravity="center" android:orientation="vertical" android:id="@id/repeatCenter" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_centerInParent="true" android:layout_marginStart="15.0dp" android:layout_alignParentStart="true">
+                        <RelativeLayout android:id="@id/repeatLayout" android:background="@drawable/background_item_color" android:layout_width="39.0dp" android:layout_height="39.0dp">
+                            <ImageView android:id="@id/imageRepeat" android:layout_width="20.0dp" android:layout_height="20.0dp" android:src="@drawable/ic_baseline_repeat_one_24" android:layout_centerInParent="true" android:contentDescription="@string/app_name" app:tint="#4d4d4d" />
+                        </RelativeLayout>
+                        <TextView android:textSize="11.0sp" android:textColor="@color/colorSecondText" android:gravity="center" android:id="@id/textRepeat" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="3.0dp" android:text="@string/text_repeat_one" android:maxLines="2" android:ems="5" android:textAlignment="center" />
+                    </LinearLayout>
+                    <LinearLayout android:gravity="center" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_centerInParent="true">
+                        <ImageView android:id="@id/backButton" android:focusable="true" android:clickable="true" android:layout_width="30.0dp" android:layout_height="30.0dp" android:src="@drawable/ic_baseline_skip_previous_24" android:contentDescription="@string/app_name" />
+                        <ImageView android:id="@id/pauseButton" android:background="@drawable/background_music_button" android:padding="8.0dp" android:focusable="true" android:clickable="true" android:layout_width="45.0dp" android:layout_height="45.0dp" android:src="@drawable/ic_baseline_play_arrow_24" android:contentDescription="@string/app_name" android:layout_marginStart="20.0dp" android:layout_marginEnd="20.0dp" app:tint="@color/white" />
+                        <ImageView android:id="@id/nextButton" android:focusable="true" android:clickable="true" android:layout_width="30.0dp" android:layout_height="30.0dp" android:src="@drawable/ic_baseline_skip_next_24" android:contentDescription="@string/app_name" />
+                    </LinearLayout>
+                </RelativeLayout>
+            </LinearLayout>
+        </RelativeLayout>
+    </RelativeLayout>
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

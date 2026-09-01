@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout android:background="@color/white" android:layout_width="match_parent" android:layout_height="match_parent"
+  xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto">
+    <com.google.android.material.appbar.AppBarLayout android:id="@id/appbar" android:layout_width="match_parent" android:layout_height="wrap_content" android:backgroundTint="@color/white">
+        <com.google.android.material.appbar.MaterialToolbar android:id="@id/toolbar" android:layout_width="match_parent" android:layout_height="wrap_content" app:title="@string/text_video" />
+    </com.google.android.material.appbar.AppBarLayout>
+    <TextView android:textSize="20.0sp" android:textStyle="bold" android:textColor="#4d4d4d" android:ellipsize="end" android:id="@id/textListEmpty" android:visibility="gone" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/text_list_empty" android:maxLines="1" android:lines="1" android:minLines="1" android:layout_centerInParent="true" android:layout_marginStart="10.0dp" android:layout_marginEnd="10.0dp" app:drawableTopCompat="@drawable/ic_baseline_video_24_big" />
+    <ProgressBar android:id="@id/progressList" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_centerInParent="true" />
+    <androidx.recyclerview.widget.RecyclerView android:id="@id/videoList" android:paddingBottom="20.0dp" android:clipToPadding="false" android:layout_width="match_parent" android:layout_height="match_parent" android:layout_above="@id/adBanner" android:layout_below="@id/appbar" />
+    <com.google.android.gms.ads.AdView android:id="@id/adBanner" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_alignParentBottom="true" android:layout_centerInParent="true" app:adSize="BANNER" app:adUnitId="@string/ad_banner_uid" />
+</RelativeLayout>
