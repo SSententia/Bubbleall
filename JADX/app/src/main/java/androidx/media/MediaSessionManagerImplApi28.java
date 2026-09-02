@@ -1,0 +1,37 @@
+package androidx.media;
+
+import android.content.Context;
+import androidx.tracing.Trace$$ExternalSyntheticApiModelOutline0;
+
+/* JADX INFO: loaded from: classes.dex */
+class MediaSessionManagerImplApi28 extends MediaSessionManagerImplApi21 {
+    android.media.session.MediaSessionManager mObject;
+
+    MediaSessionManagerImplApi28(Context context) {
+        super(context);
+        this.mObject = (android.media.session.MediaSessionManager) context.getSystemService("media_session");
+    }
+
+    @Override // androidx.media.MediaSessionManagerImplApi21, androidx.media.MediaSessionManagerImplBase, androidx.media.MediaSessionManager.MediaSessionManagerImpl
+    public boolean isTrustedForMediaControl(MediaSessionManager.RemoteUserInfoImpl remoteUserInfoImpl) {
+        return super.isTrustedForMediaControl(remoteUserInfoImpl);
+    }
+
+    static final class RemoteUserInfoImplApi28 extends MediaSessionManagerImplBase.RemoteUserInfoImplBase {
+        final android.media.session.MediaSessionManager.RemoteUserInfo mObject;
+
+        RemoteUserInfoImplApi28(String str, int i, int i2) {
+            super(str, i, i2);
+            this.mObject = Trace$$ExternalSyntheticApiModelOutline0.m283m(str, i, i2);
+        }
+
+        RemoteUserInfoImplApi28(android.media.session.MediaSessionManager.RemoteUserInfo remoteUserInfo) {
+            super(remoteUserInfo.getPackageName(), remoteUserInfo.getPid(), remoteUserInfo.getUid());
+            this.mObject = remoteUserInfo;
+        }
+
+        static String getPackageName(android.media.session.MediaSessionManager.RemoteUserInfo remoteUserInfo) {
+            return remoteUserInfo.getPackageName();
+        }
+    }
+}

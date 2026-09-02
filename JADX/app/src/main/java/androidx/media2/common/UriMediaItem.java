@@ -1,0 +1,89 @@
+package androidx.media2.common;
+
+import android.net.Uri;
+import androidx.core.util.Preconditions;
+import java.net.CookieHandler;
+import java.net.CookieManager;
+import java.net.HttpCookie;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+/* JADX INFO: loaded from: classes.dex */
+public class UriMediaItem extends MediaItem {
+    private final Uri mUri;
+    private final List<HttpCookie> mUriCookies;
+    private final Map<String, String> mUriHeader;
+
+    UriMediaItem(Builder builder) {
+        super(builder);
+        this.mUri = builder.mUri;
+        this.mUriHeader = builder.mUriHeader;
+        this.mUriCookies = builder.mUriCookies;
+    }
+
+    public Uri getUri() {
+        return this.mUri;
+    }
+
+    public Map<String, String> getUriHeaders() {
+        if (this.mUriHeader == null) {
+            return null;
+        }
+        return new HashMap(this.mUriHeader);
+    }
+
+    public List<HttpCookie> getUriCookies() {
+        if (this.mUriCookies == null) {
+            return null;
+        }
+        return new ArrayList(this.mUriCookies);
+    }
+
+    public static final class Builder extends MediaItem.Builder {
+        Uri mUri;
+        List<HttpCookie> mUriCookies;
+        Map<String, String> mUriHeader;
+
+        public Builder(Uri uri) {
+            this(uri, null, null);
+        }
+
+        public Builder(Uri uri, Map<String, String> map, List<HttpCookie> list) {
+            CookieHandler cookieHandler;
+            Preconditions.checkNotNull(uri, "uri cannot be null");
+            this.mUri = uri;
+            if (list != null && (cookieHandler = CookieHandler.getDefault()) != null && !(cookieHandler instanceof CookieManager)) {
+                throw new IllegalArgumentException("The cookie handler has to be of CookieManager type when cookies are provided");
+            }
+            this.mUri = uri;
+            if (map != null) {
+                this.mUriHeader = new HashMap(map);
+            }
+            if (list != null) {
+                this.mUriCookies = new ArrayList(list);
+            }
+        }
+
+        @Override // androidx.media2.common.MediaItem.Builder
+        public Builder setMetadata(MediaMetadata mediaMetadata) {
+            return (Builder) super.setMetadata(mediaMetadata);
+        }
+
+        @Override // androidx.media2.common.MediaItem.Builder
+        public Builder setStartPosition(long j) {
+            return (Builder) super.setStartPosition(j);
+        }
+
+        @Override // androidx.media2.common.MediaItem.Builder
+        public Builder setEndPosition(long j) {
+            return (Builder) super.setEndPosition(j);
+        }
+
+        @Override // androidx.media2.common.MediaItem.Builder
+        public UriMediaItem build() {
+            return new UriMediaItem(this);
+        }
+    }
+}
