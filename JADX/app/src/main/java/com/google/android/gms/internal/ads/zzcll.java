@@ -1,0 +1,413 @@
+package com.google.android.gms.internal.ads;
+
+import android.net.Uri;
+import android.support.v4.media.session.PlaybackStateCompat;
+import android.text.TextUtils;
+import java.io.EOFException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InterruptedIOException;
+import java.lang.reflect.Method;
+import java.net.HttpURLConnection;
+import java.net.NoRouteToHostException;
+import java.net.ProtocolException;
+import java.net.Socket;
+import java.net.SocketException;
+import java.net.URL;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLSocketFactory;
+
+/* JADX INFO: compiled from: com.google.android.gms:play-services-ads@@20.5.0 */
+/* JADX INFO: loaded from: classes2.dex */
+final class zzcll extends zzag implements zzaw {
+    private static final Pattern zzb = Pattern.compile("^bytes (\\d+)-(\\d+)/(\\d+)$");
+    private static final AtomicReference<byte[]> zzc = new AtomicReference<>();
+    private final SSLSocketFactory zzd;
+    private final int zze;
+    private final int zzf;
+    private final String zzg;
+    private final zzav zzh;
+    private zzan zzi;
+    private HttpURLConnection zzj;
+    private InputStream zzk;
+    private boolean zzl;
+    private int zzm;
+    private long zzn;
+    private long zzo;
+    private long zzp;
+    private long zzq;
+    private int zzr;
+    private final Set<Socket> zzs;
+
+    zzcll(String str, zzay zzayVar, int i, int i2, int i3) {
+        super(true);
+        this.zzd = new zzclk(this);
+        this.zzs = new HashSet();
+        zzakt.zzf(str);
+        this.zzg = str;
+        this.zzh = new zzav();
+        this.zze = i;
+        this.zzf = i2;
+        this.zzr = i3;
+        if (zzayVar != null) {
+            zza(zzayVar);
+        }
+    }
+
+    private final void zzn() {
+        HttpURLConnection httpURLConnection = this.zzj;
+        if (httpURLConnection != null) {
+            try {
+                httpURLConnection.disconnect();
+            } catch (Exception e) {
+                com.google.android.gms.ads.internal.util.zze.zzg("Unexpected error while disconnecting", e);
+            }
+            this.zzj = null;
+        }
+    }
+
+    @Override // com.google.android.gms.internal.ads.zzag, com.google.android.gms.internal.ads.zzaj
+    public final Map<String, List<String>> zzf() {
+        HttpURLConnection httpURLConnection = this.zzj;
+        if (httpURLConnection == null) {
+            return null;
+        }
+        return httpURLConnection.getHeaderFields();
+    }
+
+    /* JADX WARN: Code duplicated, block: B:48:0x0110  */
+    @Override // com.google.android.gms.internal.ads.zzaj
+    public final long zzh(zzan zzanVar) throws zzat {
+        long j;
+        long jMax;
+        this.zzi = zzanVar;
+        long j2 = 0;
+        this.zzq = 0L;
+        this.zzp = 0L;
+        try {
+            URL url = new URL(zzanVar.zza.toString());
+            byte[] bArr = zzanVar.zzc;
+            long j3 = zzanVar.zzf;
+            long j4 = zzanVar.zzg;
+            boolean zZzb = zzanVar.zzb(1);
+            int i = 0;
+            while (true) {
+                int i2 = i + 1;
+                if (i > 20) {
+                    StringBuilder sb = new StringBuilder(31);
+                    sb.append("Too many redirects: ");
+                    sb.append(i2);
+                    throw new NoRouteToHostException(sb.toString());
+                }
+                HttpURLConnection httpURLConnection = (HttpURLConnection) url.openConnection();
+                if (httpURLConnection instanceof HttpsURLConnection) {
+                    ((HttpsURLConnection) httpURLConnection).setSSLSocketFactory(this.zzd);
+                }
+                httpURLConnection.setConnectTimeout(this.zze);
+                httpURLConnection.setReadTimeout(this.zzf);
+                for (Map.Entry<String, String> entry : this.zzh.zza().entrySet()) {
+                    httpURLConnection.setRequestProperty(entry.getKey(), entry.getValue());
+                }
+                if (j3 != j2 || j4 != -1) {
+                    StringBuilder sb2 = new StringBuilder(27);
+                    sb2.append("bytes=");
+                    sb2.append(j3);
+                    sb2.append("-");
+                    String string = sb2.toString();
+                    if (j4 != -1) {
+                        StringBuilder sb3 = new StringBuilder(string.length() + 20);
+                        sb3.append(string);
+                        sb3.append((j3 + j4) - 1);
+                        string = sb3.toString();
+                    }
+                    httpURLConnection.setRequestProperty("Range", string);
+                }
+                httpURLConnection.setRequestProperty("User-Agent", this.zzg);
+                if (!zZzb) {
+                    httpURLConnection.setRequestProperty("Accept-Encoding", "identity");
+                }
+                httpURLConnection.setInstanceFollowRedirects(false);
+                httpURLConnection.setDoOutput(false);
+                httpURLConnection.connect();
+                int responseCode = httpURLConnection.getResponseCode();
+                if (responseCode != 300 && responseCode != 301 && responseCode != 302 && responseCode != 303 && responseCode != 307 && responseCode != 308) {
+                    this.zzj = httpURLConnection;
+                    try {
+                        int responseCode2 = httpURLConnection.getResponseCode();
+                        this.zzm = responseCode2;
+                        if (responseCode2 < 200 || responseCode2 > 299) {
+                            Map<String, List<String>> headerFields = this.zzj.getHeaderFields();
+                            zzn();
+                            zzau zzauVar = new zzau(this.zzm, null, null, headerFields, zzanVar, zzamq.zzf);
+                            if (this.zzm != 416) {
+                                throw zzauVar;
+                            }
+                            zzauVar.initCause(new zzak(2008));
+                            throw zzauVar;
+                        }
+                        if (responseCode2 == 200) {
+                            j = zzanVar.zzf;
+                            if (j == 0) {
+                                j = 0;
+                            }
+                        } else {
+                            j = 0;
+                        }
+                        this.zzn = j;
+                        if (zzanVar.zzb(1)) {
+                            this.zzo = zzanVar.zzg;
+                        } else {
+                            long j5 = zzanVar.zzg;
+                            if (j5 != -1) {
+                                this.zzo = j5;
+                            } else {
+                                HttpURLConnection httpURLConnection2 = this.zzj;
+                                String headerField = httpURLConnection2.getHeaderField("Content-Length");
+                                if (TextUtils.isEmpty(headerField)) {
+                                    jMax = -1;
+                                } else {
+                                    try {
+                                        jMax = Long.parseLong(headerField);
+                                    } catch (NumberFormatException unused) {
+                                        StringBuilder sb4 = new StringBuilder(String.valueOf(headerField).length() + 28);
+                                        sb4.append("Unexpected Content-Length [");
+                                        sb4.append(headerField);
+                                        sb4.append("]");
+                                        com.google.android.gms.ads.internal.util.zze.zzf(sb4.toString());
+                                        jMax = -1;
+                                    }
+                                }
+                                String headerField2 = httpURLConnection2.getHeaderField("Content-Range");
+                                if (!TextUtils.isEmpty(headerField2)) {
+                                    Matcher matcher = zzb.matcher(headerField2);
+                                    if (matcher.find()) {
+                                        try {
+                                            long j6 = (Long.parseLong(matcher.group(2)) - Long.parseLong(matcher.group(1))) + 1;
+                                            if (jMax < 0) {
+                                                jMax = j6;
+                                            } else if (jMax != j6) {
+                                                StringBuilder sb5 = new StringBuilder(String.valueOf(headerField).length() + 26 + String.valueOf(headerField2).length());
+                                                sb5.append("Inconsistent headers [");
+                                                sb5.append(headerField);
+                                                sb5.append("] [");
+                                                sb5.append(headerField2);
+                                                sb5.append("]");
+                                                com.google.android.gms.ads.internal.util.zze.zzi(sb5.toString());
+                                                jMax = Math.max(jMax, j6);
+                                            }
+                                        } catch (NumberFormatException unused2) {
+                                            StringBuilder sb6 = new StringBuilder(String.valueOf(headerField2).length() + 27);
+                                            sb6.append("Unexpected Content-Range [");
+                                            sb6.append(headerField2);
+                                            sb6.append("]");
+                                            com.google.android.gms.ads.internal.util.zze.zzf(sb6.toString());
+                                        }
+                                    }
+                                }
+                                this.zzo = jMax != -1 ? jMax - this.zzn : -1L;
+                            }
+                        }
+                        try {
+                            this.zzk = this.zzj.getInputStream();
+                            this.zzl = true;
+                            zzc(zzanVar);
+                            return this.zzo;
+                        } catch (IOException e) {
+                            zzn();
+                            throw new zzat(e, zzanVar, 2000, 1);
+                        }
+                    } catch (IOException e2) {
+                        zzn();
+                        String strValueOf = String.valueOf(zzanVar.zza.toString());
+                        throw new zzat(strValueOf.length() != 0 ? "Unable to connect to ".concat(strValueOf) : new String("Unable to connect to "), e2, zzanVar, 1);
+                    }
+                }
+                String headerField3 = httpURLConnection.getHeaderField("Location");
+                httpURLConnection.disconnect();
+                if (headerField3 == null) {
+                    throw new ProtocolException("Null location redirect");
+                }
+                URL url2 = new URL(url, headerField3);
+                String protocol = url2.getProtocol();
+                if (!"https".equals(protocol) && !"http".equals(protocol)) {
+                    String strValueOf2 = String.valueOf(protocol);
+                    throw new ProtocolException(strValueOf2.length() != 0 ? "Unsupported protocol redirect: ".concat(strValueOf2) : new String("Unsupported protocol redirect: "));
+                }
+                url = url2;
+                i = i2;
+                j2 = 0;
+            }
+        } catch (IOException e3) {
+            String strValueOf3 = String.valueOf(zzanVar.zza.toString());
+            throw new zzat(strValueOf3.length() != 0 ? "Unable to connect to ".concat(strValueOf3) : new String("Unable to connect to "), e3, zzanVar, 1);
+        }
+    }
+
+    @Override // com.google.android.gms.internal.ads.zzaj
+    public final Uri zzi() {
+        HttpURLConnection httpURLConnection = this.zzj;
+        if (httpURLConnection == null) {
+            return null;
+        }
+        return Uri.parse(httpURLConnection.getURL().toString());
+    }
+
+    /* JADX WARN: Code duplicated, block: B:27:0x0050 A[Catch: Exception -> 0x0069, all -> 0x008f, TRY_LEAVE, TryCatch #0 {Exception -> 0x0069, blocks: (B:15:0x0021, B:17:0x0029, B:23:0x0038, B:25:0x0048, B:27:0x0050), top: B:45:0x0021 }] */
+    /* JADX WARN: Code duplicated, block: B:41:0x0099  */
+    @Override // com.google.android.gms.internal.ads.zzaj
+    public final void zzj() throws zzat {
+        String name;
+        try {
+            if (this.zzk != null) {
+                HttpURLConnection httpURLConnection = this.zzj;
+                long j = this.zzo;
+                if (j != -1) {
+                    j -= this.zzq;
+                }
+                if (zzamq.zza == 19 || zzamq.zza == 20) {
+                    try {
+                        InputStream inputStream = httpURLConnection.getInputStream();
+                        if (j == -1) {
+                            if (inputStream.read() != -1) {
+                                name = inputStream.getClass().getName();
+                                if (name.equals("com.android.okhttp.internal.http.HttpTransport$ChunkedInputStream") || name.equals("com.android.okhttp.internal.http.HttpTransport$FixedLengthInputStream")) {
+                                    Method declaredMethod = inputStream.getClass().getSuperclass().getDeclaredMethod("unexpectedEndOfInput", new Class[0]);
+                                    declaredMethod.setAccessible(true);
+                                    declaredMethod.invoke(inputStream, new Object[0]);
+                                }
+                            }
+                            this.zzk = null;
+                            zzn();
+                            if (this.zzl) {
+                                this.zzl = false;
+                                zze();
+                            }
+                            this.zzs.clear();
+                            throw th;
+                        }
+                        if (j > PlaybackStateCompat.ACTION_PLAY_FROM_SEARCH) {
+                            name = inputStream.getClass().getName();
+                            if (name.equals("com.android.okhttp.internal.http.HttpTransport$ChunkedInputStream")) {
+                                Method declaredMethod2 = inputStream.getClass().getSuperclass().getDeclaredMethod("unexpectedEndOfInput", new Class[0]);
+                                declaredMethod2.setAccessible(true);
+                                declaredMethod2.invoke(inputStream, new Object[0]);
+                            } else {
+                                Method declaredMethod3 = inputStream.getClass().getSuperclass().getDeclaredMethod("unexpectedEndOfInput", new Class[0]);
+                                declaredMethod3.setAccessible(true);
+                                declaredMethod3.invoke(inputStream, new Object[0]);
+                            }
+                        }
+                    } catch (Exception unused) {
+                    }
+                }
+                try {
+                    this.zzk.close();
+                } catch (IOException e) {
+                    throw new zzat(e, this.zzi, 2000, 3);
+                }
+            }
+            this.zzk = null;
+            zzn();
+            if (this.zzl) {
+                this.zzl = false;
+                zze();
+            }
+            this.zzs.clear();
+        } catch (Throwable th) {
+            this.zzk = null;
+            zzn();
+            if (this.zzl) {
+                this.zzl = false;
+                zze();
+            }
+            this.zzs.clear();
+            throw th;
+        }
+    }
+
+    final void zzl(int i) {
+        this.zzr = i;
+        for (Socket socket : this.zzs) {
+            if (!socket.isClosed()) {
+                try {
+                    socket.setReceiveBufferSize(this.zzr);
+                } catch (SocketException e) {
+                    com.google.android.gms.ads.internal.util.zze.zzj("Failed to update receive buffer size.", e);
+                }
+            }
+        }
+    }
+
+    /* JADX WARN: Code duplicated, block: B:29:0x0077 A[Catch: IOException -> 0x008e, TryCatch #0 {IOException -> 0x008e, blocks: (B:2:0x0000, B:21:0x0056, B:23:0x005e, B:26:0x0069, B:27:0x006f, B:29:0x0077, B:32:0x007e, B:33:0x0083, B:34:0x0084, B:5:0x000b, B:7:0x0016, B:8:0x001a, B:10:0x0022, B:13:0x0038, B:14:0x0042, B:15:0x0047, B:16:0x0048, B:17:0x004d, B:18:0x004e), top: B:39:0x0000 }] */
+    /* JADX WARN: Code duplicated, block: B:31:0x007d  */
+    /* JADX WARN: Code duplicated, block: B:32:0x007e A[Catch: IOException -> 0x008e, TryCatch #0 {IOException -> 0x008e, blocks: (B:2:0x0000, B:21:0x0056, B:23:0x005e, B:26:0x0069, B:27:0x006f, B:29:0x0077, B:32:0x007e, B:33:0x0083, B:34:0x0084, B:5:0x000b, B:7:0x0016, B:8:0x001a, B:10:0x0022, B:13:0x0038, B:14:0x0042, B:15:0x0047, B:16:0x0048, B:17:0x004d, B:18:0x004e), top: B:39:0x0000 }] */
+    /* JADX WARN: Code duplicated, block: B:34:0x0084 A[Catch: IOException -> 0x008e, TRY_LEAVE, TryCatch #0 {IOException -> 0x008e, blocks: (B:2:0x0000, B:21:0x0056, B:23:0x005e, B:26:0x0069, B:27:0x006f, B:29:0x0077, B:32:0x007e, B:33:0x0083, B:34:0x0084, B:5:0x000b, B:7:0x0016, B:8:0x001a, B:10:0x0022, B:13:0x0038, B:14:0x0042, B:15:0x0047, B:16:0x0048, B:17:0x004d, B:18:0x004e), top: B:39:0x0000 }] */
+    @Override // com.google.android.gms.internal.ads.zzah
+    public final int zzg(byte[] bArr, int i, int i2) throws zzat {
+        int i3;
+        try {
+            if (this.zzp != this.zzn) {
+                byte[] andSet = zzc.getAndSet(null);
+                if (andSet == null) {
+                    andSet = new byte[4096];
+                }
+                while (true) {
+                    long j = this.zzp;
+                    long j2 = this.zzn;
+                    if (j == j2) {
+                        zzc.set(andSet);
+                        break;
+                    }
+                    int i4 = this.zzk.read(andSet, 0, (int) Math.min(j2 - j, andSet.length));
+                    if (Thread.interrupted()) {
+                        throw new InterruptedIOException();
+                    }
+                    if (i4 == -1) {
+                        throw new EOFException();
+                    }
+                    this.zzp += (long) i4;
+                    zzd(i4);
+                }
+            }
+            if (i2 == 0) {
+                return 0;
+            }
+            long j3 = this.zzo;
+            if (j3 != -1) {
+                long j4 = j3 - this.zzq;
+                if (j4 != 0) {
+                    i2 = (int) Math.min(i2, j4);
+                    i3 = this.zzk.read(bArr, i, i2);
+                    if (i3 == -1) {
+                        this.zzq += (long) i3;
+                        zzd(i3);
+                        return i3;
+                    }
+                    if (this.zzo == -1) {
+                        throw new EOFException();
+                    }
+                }
+            } else {
+                i3 = this.zzk.read(bArr, i, i2);
+                if (i3 == -1) {
+                    this.zzq += (long) i3;
+                    zzd(i3);
+                    return i3;
+                }
+                if (this.zzo == -1) {
+                    throw new EOFException();
+                }
+            }
+            return -1;
+        } catch (IOException e) {
+            throw new zzat(e, this.zzi, 2000, 2);
+        }
+    }
+}

@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:background="@drawable/background_item_color"
+    android:layout_width="70dp"
+    android:layout_height="70dp"
+    android:layout_marginEnd="20dp">
+    <ImageView
+        android:id="@+id/colorView"
+        android:layout_width="30dp"
+        android:layout_height="30dp"
+        android:src="@drawable/background_bubble"
+        android:layout_centerInParent="true"
+        android:contentDescription="@string/app_name"
+        app:tint="#4d4d4d"/>
+    <FrameLayout
+        android:id="@+id/itemTheme"
+        android:background="@drawable/background_bubble_adapter"
+        android:visibility="gone"
+        android:layout_width="30dp"
+        android:layout_height="30dp"
+        android:layout_centerInParent="true"/>
+</RelativeLayout>

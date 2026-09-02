@@ -1,0 +1,34 @@
+package com.google.android.gms.internal.ads;
+
+import android.content.Context;
+
+/* JADX INFO: compiled from: com.google.android.gms:play-services-ads@@20.5.0 */
+/* JADX INFO: loaded from: classes2.dex */
+public final class zzday implements zzgla<zzcdy> {
+    private final zzdax zza;
+    private final zzgln<Context> zzb;
+    private final zzgln<zzcgz> zzc;
+    private final zzgln<zzezz> zzd;
+    private final zzgln<zzcdu> zze;
+
+    public zzday(zzdax zzdaxVar, zzgln<Context> zzglnVar, zzgln<zzcgz> zzglnVar2, zzgln<zzezz> zzglnVar3, zzgln<zzcdu> zzglnVar4) {
+        this.zza = zzdaxVar;
+        this.zzb = zzglnVar;
+        this.zzc = zzglnVar2;
+        this.zzd = zzglnVar3;
+        this.zze = zzglnVar4;
+    }
+
+    @Override // com.google.android.gms.internal.ads.zzgln
+    public final /* bridge */ /* synthetic */ Object zzb() {
+        Context contextZzb = this.zzb.zzb();
+        zzcgz zzcgzVarZza = ((zzcox) this.zzc).zza();
+        zzezz zzezzVarZza = ((zzcxw) this.zzd).zza();
+        zzcdu zzcduVar = new zzcdu();
+        zzcdv zzcdvVar = zzezzVarZza.zzA;
+        if (zzcdvVar != null) {
+            return new zzcds(contextZzb, zzcgzVarZza, zzcdvVar, zzezzVarZza.zzs.zzb, zzcduVar, null);
+        }
+        return null;
+    }
+}

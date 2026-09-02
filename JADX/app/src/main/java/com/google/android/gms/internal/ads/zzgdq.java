@@ -1,0 +1,25 @@
+package com.google.android.gms.internal.ads;
+
+import java.security.GeneralSecurityException;
+import java.security.InvalidAlgorithmParameterException;
+
+/* JADX INFO: compiled from: com.google.android.gms:play-services-ads@@20.5.0 */
+/* JADX INFO: loaded from: classes2.dex */
+public final class zzgdq implements zzfty {
+    private final zzfxc zza;
+    private final int zzb;
+
+    public zzgdq(zzfxc zzfxcVar, int i) throws GeneralSecurityException {
+        this.zza = zzfxcVar;
+        this.zzb = i;
+        if (i < 10) {
+            throw new InvalidAlgorithmParameterException("tag size too small, need at least 10 bytes");
+        }
+        zzfxcVar.zza(new byte[0], i);
+    }
+
+    @Override // com.google.android.gms.internal.ads.zzfty
+    public final byte[] zza(byte[] bArr) throws GeneralSecurityException {
+        return this.zza.zza(bArr, this.zzb);
+    }
+}

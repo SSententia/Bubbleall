@@ -1,0 +1,23 @@
+package com.google.android.gms.internal.ads;
+
+/* JADX INFO: compiled from: com.google.android.gms:play-services-ads@@20.5.0 */
+/* JADX INFO: loaded from: classes2.dex */
+public interface zzafy {
+    void zza();
+
+    void zzb();
+
+    void zzc();
+
+    long zzd();
+
+    boolean zze();
+
+    boolean zzf(long j, long j2, float f);
+
+    boolean zzg(long j, float f, boolean z, long j2);
+
+    zzko zzh();
+
+    void zzi(zzahv[] zzahvVarArr, zzs zzsVar, zzjg[] zzjgVarArr);
+}

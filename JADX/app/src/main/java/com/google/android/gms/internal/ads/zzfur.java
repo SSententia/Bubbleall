@@ -1,0 +1,28 @@
+package com.google.android.gms.internal.ads;
+
+import java.security.GeneralSecurityException;
+import java.util.logging.Logger;
+
+/* JADX INFO: compiled from: com.google.android.gms:play-services-ads@@20.5.0 */
+/* JADX INFO: loaded from: classes2.dex */
+public final class zzfur implements zzfue<zzftg, zzftg> {
+    private static final Logger zza = Logger.getLogger(zzfur.class.getName());
+
+    zzfur() {
+    }
+
+    @Override // com.google.android.gms.internal.ads.zzfue
+    public final /* bridge */ /* synthetic */ zzftg zza(zzfud<zzftg> zzfudVar) throws GeneralSecurityException {
+        return new zzfuq(zzfudVar, null);
+    }
+
+    @Override // com.google.android.gms.internal.ads.zzfue
+    public final Class<zzftg> zzb() {
+        return zzftg.class;
+    }
+
+    @Override // com.google.android.gms.internal.ads.zzfue
+    public final Class<zzftg> zzc() {
+        return zzftg.class;
+    }
+}

@@ -1,0 +1,18 @@
+package com.google.android.gms.internal.ads;
+
+import android.content.Context;
+
+/* JADX INFO: compiled from: com.google.android.gms:play-services-ads@@20.5.0 */
+/* JADX INFO: loaded from: classes2.dex */
+public final class zzcrj implements zzgla<zzfit> {
+    private final zzgln<Context> zza;
+
+    public zzcrj(zzgln<Context> zzglnVar) {
+        this.zza = zzglnVar;
+    }
+
+    @Override // com.google.android.gms.internal.ads.zzgln
+    public final /* bridge */ /* synthetic */ Object zzb() {
+        return new zzfit(((zzcoo) this.zza).zza(), com.google.android.gms.ads.internal.zzt.zzq().zza());
+    }
+}

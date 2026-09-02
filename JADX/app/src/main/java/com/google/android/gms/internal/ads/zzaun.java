@@ -1,0 +1,53 @@
+package com.google.android.gms.internal.ads;
+
+import android.os.Looper;
+import android.os.SystemClock;
+import java.io.IOException;
+import java.util.concurrent.ExecutorService;
+
+/* JADX INFO: compiled from: com.google.android.gms:play-services-ads@@20.5.0 */
+/* JADX INFO: loaded from: classes2.dex */
+public final class zzaun {
+    private final ExecutorService zza = zzave.zzb("Loader:ExtractorMediaPeriod");
+    private zzauk<? extends zzaul> zzb;
+    private IOException zzc;
+
+    public zzaun(String str) {
+    }
+
+    public final <T extends zzaul> long zze(T t, zzauj<T> zzaujVar, int i) {
+        Looper looperMyLooper = Looper.myLooper();
+        zzaup.zzd(looperMyLooper != null);
+        long jElapsedRealtime = SystemClock.elapsedRealtime();
+        new zzauk(this, looperMyLooper, t, zzaujVar, i, jElapsedRealtime).zzb(0L);
+        return jElapsedRealtime;
+    }
+
+    public final boolean zzf() {
+        return this.zzb != null;
+    }
+
+    public final void zzg() {
+        this.zzb.zzc(false);
+    }
+
+    public final void zzh(Runnable runnable) {
+        zzauk<? extends zzaul> zzaukVar = this.zzb;
+        if (zzaukVar != null) {
+            zzaukVar.zzc(true);
+        }
+        this.zza.execute(runnable);
+        this.zza.shutdown();
+    }
+
+    public final void zzi(int i) throws IOException {
+        IOException iOException = this.zzc;
+        if (iOException != null) {
+            throw iOException;
+        }
+        zzauk<? extends zzaul> zzaukVar = this.zzb;
+        if (zzaukVar != null) {
+            zzaukVar.zza(zzaukVar.zza);
+        }
+    }
+}

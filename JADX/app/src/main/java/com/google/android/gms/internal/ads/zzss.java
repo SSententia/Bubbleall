@@ -1,0 +1,19 @@
+package com.google.android.gms.internal.ads;
+
+import android.net.Uri;
+import java.util.Map;
+
+/* JADX INFO: compiled from: com.google.android.gms:play-services-ads@@20.5.0 */
+/* JADX INFO: loaded from: classes2.dex */
+final /* synthetic */ class zzss implements zzoa {
+    static final zzoa zza = new zzss();
+
+    private zzss() {
+    }
+
+    @Override // com.google.android.gms.internal.ads.zzoa
+    public final zznu[] zza(Uri uri, Map map) {
+        zzoa zzoaVar = zzst.zza;
+        return new zznu[]{new zzst()};
+    }
+}

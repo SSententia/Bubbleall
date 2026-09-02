@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto">
+    <PreferenceCategory android:title="@string/text_shortcuts">
+        <Preference
+            android:icon="@drawable/ic_baseline_launch_24"
+            android:title="@string/text_shortcut_created"
+            android:key="key_open_shortcut_created"
+            android:summary="@string/text_create_shortcuts"/>
+        <SwitchPreference
+            android:title="@string/text_media"
+            android:key="key_shortcut_multimedia"
+            android:summary="@string/text_create_notification_media"/>
+        <SwitchPreference
+            android:title="@string/text_title_shortcut_only"
+            android:key="key_shortcut_show_only"
+            android:summary="@string/text_description_shortcut_show_only"/>
+        <SwitchPreference
+            android:title="@string/text_save_url"
+            android:key="key_save_shortcut_open"
+            android:summary="@string/text_shortcut_save_url"
+            android:defaultValue="false"/>
+        <SwitchPreference
+            android:title="@string/text_pause"
+            android:key="key_shortcut_pause"
+            android:defaultValue="true"
+            app:summary="@string/text_shortcut_pause"/>
+    </PreferenceCategory>
+</PreferenceScreen>

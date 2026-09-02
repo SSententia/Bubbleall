@@ -1,0 +1,29 @@
+package com.google.android.gms.internal.ads;
+
+/* JADX INFO: compiled from: com.google.android.gms:play-services-ads@@20.5.0 */
+/* JADX INFO: loaded from: classes2.dex */
+final class zzfrb implements Runnable {
+    final /* synthetic */ zzfsm zza;
+    final /* synthetic */ int zzb;
+    final /* synthetic */ zzfrd zzc;
+
+    zzfrb(zzfrd zzfrdVar, zzfsm zzfsmVar, int i) {
+        this.zzc = zzfrdVar;
+        this.zza = zzfsmVar;
+        this.zzb = i;
+    }
+
+    @Override // java.lang.Runnable
+    public final void run() {
+        try {
+            if (this.zza.isCancelled()) {
+                zzfrd.zza(this.zzc, null);
+                this.zzc.cancel(false);
+            } else {
+                this.zzc.zzL(this.zzb, this.zza);
+            }
+        } finally {
+            zzfrd.zzy(this.zzc, null);
+        }
+    }
+}

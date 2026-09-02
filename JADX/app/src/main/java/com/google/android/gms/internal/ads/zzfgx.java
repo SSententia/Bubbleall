@@ -1,0 +1,85 @@
+package com.google.android.gms.internal.ads;
+
+import android.os.Handler;
+import android.os.Looper;
+import android.text.TextUtils;
+import android.util.Log;
+import android.webkit.WebView;
+import kotlin.text.Typography;
+import org.json.JSONObject;
+
+/* JADX INFO: compiled from: com.google.android.gms:play-services-ads@@20.5.0 */
+/* JADX INFO: loaded from: classes2.dex */
+public final class zzfgx {
+    private static final zzfgx zza = new zzfgx();
+
+    private zzfgx() {
+    }
+
+    public static zzfgx zza() {
+        return zza;
+    }
+
+    public final void zzb(WebView webView, JSONObject jSONObject) {
+        zzg(webView, "init", jSONObject);
+    }
+
+    public final void zzc(WebView webView, String str, JSONObject jSONObject, JSONObject jSONObject2, JSONObject jSONObject3) {
+        zzg(webView, "startSession", str, jSONObject, jSONObject2, jSONObject3);
+    }
+
+    public final void zzd(WebView webView) {
+        zzg(webView, "finishSession", new Object[0]);
+    }
+
+    public final void zze(WebView webView, String str) {
+        zzg(webView, "setNativeViewHierarchy", str);
+    }
+
+    public final void zzf(WebView webView, float f) {
+        zzg(webView, "setDeviceVolume", Float.valueOf(f));
+    }
+
+    final void zzg(WebView webView, String str, Object... objArr) {
+        if (webView == null) {
+            String strConcat = str.length() != 0 ? "The WebView is null for ".concat(str) : new String("The WebView is null for ");
+            if (!zzffz.zza.booleanValue() || TextUtils.isEmpty(strConcat)) {
+                return;
+            }
+            Log.i("OMIDLIB", strConcat);
+            return;
+        }
+        StringBuilder sb = new StringBuilder(128);
+        sb.append("javascript: if(window.omidBridge!==undefined){omidBridge.");
+        sb.append(str);
+        sb.append("(");
+        if (objArr.length > 0) {
+            for (Object obj : objArr) {
+                if (obj == null) {
+                    sb.append("\"\"");
+                } else if (obj instanceof String) {
+                    String string = obj.toString();
+                    if (string.startsWith("{")) {
+                        sb.append(string);
+                    } else {
+                        sb.append(Typography.quote);
+                        sb.append(string);
+                        sb.append(Typography.quote);
+                    }
+                } else {
+                    sb.append(obj);
+                }
+                sb.append(",");
+            }
+            sb.setLength(sb.length() - 1);
+        }
+        sb.append(")}");
+        String string2 = sb.toString();
+        Handler handler = webView.getHandler();
+        if (handler == null || Looper.myLooper() == handler.getLooper()) {
+            webView.loadUrl(string2);
+        } else {
+            handler.post(new zzfgw(this, webView, string2));
+        }
+    }
+}

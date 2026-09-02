@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <PreferenceCategory android:title="@string/text_browser">
+        <Preference
+            android:title="@string/text_main_page"
+            android:key="key_save_main_page"/>
+        <SwitchPreference
+            android:title="@string/text_webs_open"
+            android:key="key_save_pages"
+            android:summary="@string/text_next_web_open"
+            android:defaultValue="false"/>
+        <SwitchPreference
+            android:title="@string/text_to_shortcut"
+            android:key="key_save_access"
+            android:summaryOn="@string/text_save_shortcut_list"
+            android:summaryOff="@string/text_open_shortcut_link"/>
+    </PreferenceCategory>
+</PreferenceScreen>

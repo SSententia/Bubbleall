@@ -1,0 +1,15 @@
+package com.google.android.gms.internal.ads;
+
+/* JADX INFO: compiled from: com.google.android.gms:play-services-ads@@20.5.0 */
+/* JADX INFO: loaded from: classes2.dex */
+final /* synthetic */ class zzdhx implements zzdgl {
+    static final zzdgl zza = new zzdhx();
+
+    private zzdhx() {
+    }
+
+    @Override // com.google.android.gms.internal.ads.zzdgl
+    public final void zza(Object obj) {
+        ((zzdhz) obj).zzb();
+    }
+}

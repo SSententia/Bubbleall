@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <PreferenceCategory android:title="@string/text_music">
+        <ListPreference
+            android:entries="@array/sort_music"
+            android:title="@string/text_order"
+            android:key="key_order_music"
+            android:summary="@string/text_music_order_description"
+            android:defaultValue="@string/text_recent_key"
+            android:entryValues="@array/sort_music_key"/>
+        <SwitchPreference
+            android:title="@string/text_only_music"
+            android:key="key_only_music"
+            android:summary="@string/text_only_music_description"
+            android:defaultValue="true"/>
+        <SwitchPreference
+            android:title="@string/text_media"
+            android:key="key_music_notification"
+            android:summary="@string/text_create_notification_media"
+            android:defaultValue="true"/>
+        <SwitchPreference
+            android:title="@string/text_audio_focus"
+            android:key="key_music_focus"
+            android:summary="@string/text_request_audio_focus"
+            android:defaultValue="true"/>
+    </PreferenceCategory>
+</PreferenceScreen>

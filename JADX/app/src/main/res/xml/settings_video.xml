@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <PreferenceCategory android:title="@string/text_video">
+        <ListPreference
+            android:entries="@array/video_pickers"
+            android:title="@string/text_video_picker"
+            android:key="key_video_picker"
+            android:summary="@string/text_summary_video_picker"
+            android:defaultValue="@string/text_video_picker1_key"
+            android:entryValues="@array/video_pickers_key"/>
+        <Preference
+            android:title="@string/text_delete_favorites"
+            android:key="key_video_delete_all_favorites"/>
+    </PreferenceCategory>
+</PreferenceScreen>

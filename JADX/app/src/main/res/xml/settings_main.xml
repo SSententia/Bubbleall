@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <PreferenceCategory android:title="@string/text_general">
+        <Preference
+            android:title="@string/bubble_position"
+            android:key="key_start_position"
+            android:summary="@string/text_bubble_position"/>
+        <SwitchPreference
+            android:title="@string/text_go_position"
+            android:key="key_go_position"
+            android:defaultValue="true"
+            android:summaryOn="@string/text_start_go_bubble_position"
+            android:summaryOff="@string/text_start_bubble_position"/>
+        <SwitchPreference
+            android:title="@string/text_only_one"
+            android:key="key_main_only_menu"
+            android:summary="@string/text_only_one_description"/>
+    </PreferenceCategory>
+    <PreferenceCategory android:title="@string/text_ads">
+        <Preference
+            android:title="@string/text_remove_ads"
+            android:key="key_block_ad_app"/>
+        <SwitchPreference
+            android:title="@string/text_block_ads"
+            android:key="key_block_ad_main"
+            android:summary="@string/text_block_ad_desc"/>
+    </PreferenceCategory>
+</PreferenceScreen>
