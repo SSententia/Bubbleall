@@ -164,7 +164,7 @@
 .end method
 
 .method private static final listenerConfig$lambda$0(Lcom/alexmanzana/bubbleall/views/AddView;Landroid/content/Context;)V
-    .locals 6
+    .locals 12
 
     const-string v0, "this$0"
 
@@ -173,6 +173,9 @@
     const-string v0, "$context"
 
     invoke-static {p1, v0}, Lkotlin/jvm/internal/Intrinsics;->checkNotNullParameter(Ljava/lang/Object;Ljava/lang/String;)V
+
+    # save the Context param: the original code below reuses p1 as scratch after .line 77
+    move-object v6, p1
 
     .line 37
     iget-boolean v0, p0, Lcom/alexmanzana/bubbleall/views/AddView;->isOpenConfig:Z
@@ -420,7 +423,143 @@
     .line 78
     invoke-virtual {v2, p1}, Landroid/widget/RelativeLayout;->setOnClickListener(Landroid/view/View$OnClickListener;)V
 
+    # tint new titles/descriptions with theme internal color (v6 = saved Context, never overwritten)
+    sget v7, Lcom/alexmanzana/bubbleall/R$id;->transparencyTitle:I
+
+    invoke-virtual {p0, v7}, Lcom/alexmanzana/bubbleall/views/AddView;->findViewById(I)Landroid/view/View;
+
+    move-result-object v7
+
+    check-cast v7, Landroid/widget/TextView;
+
+    sget-object v8, Lcom/alexmanzana/bubbleall/utils/BubblePrefs;->Companion:Lcom/alexmanzana/bubbleall/utils/BubblePrefs$Companion;
+
+    invoke-virtual {v8, v6}, Lcom/alexmanzana/bubbleall/utils/BubblePrefs$Companion;->getInternalColors(Landroid/content/Context;)I
+
+    move-result v8
+
+    invoke-virtual {v7, v8}, Landroid/widget/TextView;->setTextColor(I)V
+
+    sget v7, Lcom/alexmanzana/bubbleall/R$id;->transparencyDesc:I
+
+    invoke-virtual {p0, v7}, Lcom/alexmanzana/bubbleall/views/AddView;->findViewById(I)Landroid/view/View;
+
+    move-result-object v7
+
+    check-cast v7, Landroid/widget/TextView;
+
+    sget-object v8, Lcom/alexmanzana/bubbleall/utils/BubblePrefs;->Companion:Lcom/alexmanzana/bubbleall/utils/BubblePrefs$Companion;
+
+    invoke-virtual {v8, v6}, Lcom/alexmanzana/bubbleall/utils/BubblePrefs$Companion;->getInternalColors(Landroid/content/Context;)I
+
+    move-result v8
+
+    invoke-virtual {v7, v8}, Landroid/widget/TextView;->setTextColor(I)V
+
+    sget v7, Lcom/alexmanzana/bubbleall/R$id;->keyboardTitle:I
+
+    invoke-virtual {p0, v7}, Lcom/alexmanzana/bubbleall/views/AddView;->findViewById(I)Landroid/view/View;
+
+    move-result-object v7
+
+    check-cast v7, Landroid/widget/TextView;
+
+    sget-object v8, Lcom/alexmanzana/bubbleall/utils/BubblePrefs;->Companion:Lcom/alexmanzana/bubbleall/utils/BubblePrefs$Companion;
+
+    invoke-virtual {v8, v6}, Lcom/alexmanzana/bubbleall/utils/BubblePrefs$Companion;->getInternalColors(Landroid/content/Context;)I
+
+    move-result v8
+
+    invoke-virtual {v7, v8}, Landroid/widget/TextView;->setTextColor(I)V
+
+    sget v7, Lcom/alexmanzana/bubbleall/R$id;->keyboardDesc:I
+
+    invoke-virtual {p0, v7}, Lcom/alexmanzana/bubbleall/views/AddView;->findViewById(I)Landroid/view/View;
+
+    move-result-object v7
+
+    check-cast v7, Landroid/widget/TextView;
+
+    sget-object v8, Lcom/alexmanzana/bubbleall/utils/BubblePrefs;->Companion:Lcom/alexmanzana/bubbleall/utils/BubblePrefs$Companion;
+
+    invoke-virtual {v8, v6}, Lcom/alexmanzana/bubbleall/utils/BubblePrefs$Companion;->getInternalColors(Landroid/content/Context;)I
+
+    move-result v8
+
+    invoke-virtual {v7, v8}, Landroid/widget/TextView;->setTextColor(I)V
+
+    # transparency SeekBar: init from prefs, save + broadcast on change
+    sget v7, Lcom/alexmanzana/bubbleall/R$id;->transparencySeek:I
+
+    invoke-virtual {p0, v7}, Lcom/alexmanzana/bubbleall/views/AddView;->findViewById(I)Landroid/view/View;
+
+    move-result-object v7
+
+    check-cast v7, Landroid/widget/SeekBar;
+
+    const-string v8, "bubble_data_prefs"
+
+    const/4 v9, 0x0
+
+    invoke-virtual {v6, v8, v9}, Landroid/content/Context;->getSharedPreferences(Ljava/lang/String;I)Landroid/content/SharedPreferences;
+
+    move-result-object v8
+
+    const-string v9, "theme_alpha"
+
+    const/16 v10, 0xff
+
+    invoke-interface {v8, v9, v10}, Landroid/content/SharedPreferences;->getInt(Ljava/lang/String;I)I
+
+    move-result v8
+
+    invoke-virtual {v7, v8}, Landroid/widget/SeekBar;->setProgress(I)V
+
+    new-instance v8, Lcom/alexmanzana/bubbleall/views/AddView$listenerConfig$1$2;
+
+    invoke-direct {v8, v6}, Lcom/alexmanzana/bubbleall/views/AddView$listenerConfig$1$2;-><init>(Landroid/content/Context;)V
+
+    check-cast v8, Landroid/widget/SeekBar$OnSeekBarChangeListener;
+
+    invoke-virtual {v7, v8}, Landroid/widget/SeekBar;->setOnSeekBarChangeListener(Landroid/widget/SeekBar$OnSeekBarChangeListener;)V
+
+    # keyboard Switch: init from prefs, save on toggle
+    sget v7, Lcom/alexmanzana/bubbleall/R$id;->keyboardSwitch:I
+
+    invoke-virtual {p0, v7}, Lcom/alexmanzana/bubbleall/views/AddView;->findViewById(I)Landroid/view/View;
+
+    move-result-object v7
+
+    check-cast v7, Landroid/widget/Switch;
+
+    const-string v8, "bubble_data_prefs"
+
+    const/4 v9, 0x0
+
+    invoke-virtual {v6, v8, v9}, Landroid/content/Context;->getSharedPreferences(Ljava/lang/String;I)Landroid/content/SharedPreferences;
+
+    move-result-object v8
+
+    const-string v9, "key_no_keyboard"
+
+    const/4 v10, 0x0
+
+    invoke-interface {v8, v9, v10}, Landroid/content/SharedPreferences;->getBoolean(Ljava/lang/String;Z)Z
+
+    move-result v8
+
+    invoke-virtual {v7, v8}, Landroid/widget/Switch;->setChecked(Z)V
+
+    new-instance v8, Lcom/alexmanzana/bubbleall/views/AddView$listenerConfig$1$3;
+
+    invoke-direct {v8, v6}, Lcom/alexmanzana/bubbleall/views/AddView$listenerConfig$1$3;-><init>(Landroid/content/Context;)V
+
+    check-cast v8, Landroid/widget/CompoundButton$OnCheckedChangeListener;
+
+    invoke-virtual {v7, v8}, Landroid/widget/Switch;->setOnCheckedChangeListener(Landroid/widget/CompoundButton$OnCheckedChangeListener;)V
+
     .line 80
+
     :goto_1
     iget-boolean p1, p0, Lcom/alexmanzana/bubbleall/views/AddView;->isOpenConfig:Z
 

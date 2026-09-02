@@ -270,9 +270,21 @@
 
 .field public static switchView:I = 0x7f090237
 
+.field public static keyboardDesc:I = 0x7f0902a0
+
+.field public static keyboardSwitch:I = 0x7f0902a1
+
+.field public static keyboardTitle:I = 0x7f0902a2
+
 .field public static tab1:I = 0x7f090239
 
 .field public static tab2:I = 0x7f09023a
+
+.field public static transparencyDesc:I = 0x7f0902a3
+
+.field public static transparencySeek:I = 0x7f0902a4
+
+.field public static transparencyTitle:I = 0x7f0902a5
 
 .field public static textInternal:I = 0x7f090250
 

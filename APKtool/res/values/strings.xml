@@ -270,6 +270,8 @@ Thanks!"</string>
     <string name="text_favorite">Favorites</string>
     <string name="text_general">General</string>
     <string name="text_go_position">Go to position</string>
+    <string name="text_hide_keyboard">Hide keyboard in browser</string>
+    <string name="text_hide_keyboard_d">Don\'t open keyboard on fields, paste with long press</string>
     <string name="text_info">About</string>
     <string name="text_input_text">Field empty</string>
     <string name="text_items">Access</string>
@@ -344,6 +346,8 @@ Thanks!"</string>
     <string name="text_title_color">The color is</string>
     <string name="text_title_invalid_url">Invalid url</string>
     <string name="text_title_shortcut_only">Show only shortcuts</string>
+    <string name="text_transparency">Transparency</string>
+    <string name="text_transparency_d">Adjust transparency of all components</string>
     <string name="text_to_shortcut">To shortcut</string>
     <string name="text_url">Url</string>
     <string name="text_video">Video</string>

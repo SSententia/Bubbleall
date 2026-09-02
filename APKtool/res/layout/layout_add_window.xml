@@ -23,5 +23,20 @@
             <androidx.recyclerview.widget.RecyclerView android:id="@id/sizeBubble" android:layout_width="wrap_content" android:layout_height="wrap_content" android:overScrollMode="never" android:layout_alignParentEnd="true" />
         </RelativeLayout>
         <View android:background="#cccccc" android:layout_width="wrap_content" android:layout_height="1.0dp" />
+        <RelativeLayout android:padding="15.0dp" android:layout_width="match_parent" android:layout_height="wrap_content">
+            <LinearLayout android:orientation="vertical" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_centerInParent="true" android:layout_marginStart="5.0dp" android:layout_marginEnd="10.0dp" android:layout_toStartOf="@id/transparencySeek" android:layout_alignParentStart="true">
+                <TextView android:textSize="16.0sp" android:textColor="@color/colorPrimaryText" android:ellipsize="end" android:id="@id/transparencyTitle" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/text_transparency" android:maxLines="1" android:lines="1" android:minLines="1" />
+                <TextView android:textSize="13.0sp" android:textColor="@color/colorSecondText" android:ellipsize="end" android:id="@id/transparencyDesc" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/text_transparency_d" android:maxLines="2" android:minLines="1" />
+            </LinearLayout>
+            <SeekBar android:id="@id/transparencySeek" android:layout_width="120.0dp" android:layout_height="wrap_content" android:max="255" android:layout_centerInParent="true" android:layout_alignParentEnd="true" />
+        </RelativeLayout>
+        <View android:background="#cccccc" android:layout_width="wrap_content" android:layout_height="1.0dp" />
+        <RelativeLayout android:padding="15.0dp" android:layout_width="match_parent" android:layout_height="wrap_content">
+            <LinearLayout android:orientation="vertical" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_centerInParent="true" android:layout_marginStart="5.0dp" android:layout_marginEnd="10.0dp" android:layout_toStartOf="@id/keyboardSwitch" android:layout_alignParentStart="true">
+                <TextView android:textSize="16.0sp" android:textColor="@color/colorPrimaryText" android:ellipsize="end" android:id="@id/keyboardTitle" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/text_hide_keyboard" android:maxLines="1" android:lines="1" android:minLines="1" />
+                <TextView android:textSize="13.0sp" android:textColor="@color/colorSecondText" android:ellipsize="end" android:id="@id/keyboardDesc" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/text_hide_keyboard_d" android:maxLines="2" android:minLines="1" />
+            </LinearLayout>
+            <Switch android:id="@id/keyboardSwitch" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_centerInParent="true" android:layout_alignParentEnd="true" />
+        </RelativeLayout>
     </LinearLayout>
 </ScrollView>

@@ -448,3 +448,38 @@
 
     return-void
 .end method
+
+.method public onCreateInputConnection(Landroid/view/inputmethod/EditorInfo;)Landroid/view/inputmethod/InputConnection;
+    .locals 3
+
+    invoke-virtual {p0}, Lcom/alexmanzana/bubbleall/views/Web;->getContext()Landroid/content/Context;
+
+    move-result-object v0
+
+    const-string v1, "bubble_data_prefs"
+
+    const/4 v2, 0x0
+
+    invoke-virtual {v0, v1, v2}, Landroid/content/Context;->getSharedPreferences(Ljava/lang/String;I)Landroid/content/SharedPreferences;
+
+    move-result-object v0
+
+    const-string v1, "key_no_keyboard"
+
+    invoke-interface {v0, v1, v2}, Landroid/content/SharedPreferences;->getBoolean(Ljava/lang/String;Z)Z
+
+    move-result v0
+
+    if-eqz v0, :cond_0
+
+    const/4 v0, 0x0
+
+    return-object v0
+
+    :cond_0
+    invoke-super {p0, p1}, Lcom/alexmanzana/bubbleall/views/Web;->onCreateInputConnection(Landroid/view/inputmethod/EditorInfo;)Landroid/view/inputmethod/InputConnection;
+
+    move-result-object v0
+
+    return-object v0
+.end method

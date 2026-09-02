@@ -3172,6 +3172,62 @@
     :goto_1
     invoke-virtual {v1}, Lcom/alexmanzana/bubbleall/window/PanelManager;->refreshStyle()V
 
+    invoke-direct {p0}, Lcom/alexmanzana/bubbleall/BubbleService;->applyAlpha()V
+
+    return-void
+.end method
+
+.method private final applyAlpha()V
+    .locals 4
+
+    const-string v0, "bubble_data_prefs"
+
+    const/4 v1, 0x0
+
+    invoke-virtual {p0, v0, v1}, Lcom/alexmanzana/bubbleall/BubbleService;->getSharedPreferences(Ljava/lang/String;I)Landroid/content/SharedPreferences;
+
+    move-result-object v0
+
+    const-string v1, "theme_alpha"
+
+    const/16 v2, 0xff
+
+    invoke-interface {v0, v1, v2}, Landroid/content/SharedPreferences;->getInt(Ljava/lang/String;I)I
+
+    move-result v0
+
+    int-to-float v0, v0
+
+    const v1, 0x437f0000
+
+    div-float/2addr v0, v1
+
+    iget-object v1, p0, Lcom/alexmanzana/bubbleall/BubbleService;->mBubble:Landroid/view/View;
+
+    if-nez v1, :cond_0
+
+    const-string v1, "mBubble"
+
+    invoke-static {v1}, Lkotlin/jvm/internal/Intrinsics;->throwUninitializedPropertyAccessException(Ljava/lang/String;)V
+
+    const/4 v1, 0x0
+
+    :cond_0
+    invoke-virtual {v1, v0}, Landroid/view/View;->setAlpha(F)V
+
+    iget-object v1, p0, Lcom/alexmanzana/bubbleall/BubbleService;->mViewManager:Landroid/view/View;
+
+    if-nez v1, :cond_1
+
+    const-string v1, "mViewManager"
+
+    invoke-static {v1}, Lkotlin/jvm/internal/Intrinsics;->throwUninitializedPropertyAccessException(Ljava/lang/String;)V
+
+    const/4 v1, 0x0
+
+    :cond_1
+    invoke-virtual {v1, v0}, Landroid/view/View;->setAlpha(F)V
+
     return-void
 .end method
 
@@ -4905,6 +4961,8 @@
 
     invoke-interface {v1, v10, v4}, Landroid/view/WindowManager;->updateViewLayout(Landroid/view/View;Landroid/view/ViewGroup$LayoutParams;)V
 
+    invoke-direct/range {p0 .. p0}, Lcom/alexmanzana/bubbleall/BubbleService;->applyAlpha()V
+
     :cond_18
     if-eqz p1, :cond_19
 
@@ -5012,6 +5070,8 @@
 
     .line 321
     invoke-direct/range {p0 .. p0}, Lcom/alexmanzana/bubbleall/BubbleService;->declareProperties()V
+
+    invoke-direct/range {p0 .. p0}, Lcom/alexmanzana/bubbleall/BubbleService;->applyAlpha()V
 
     .line 322
     invoke-direct/range {p0 .. p0}, Lcom/alexmanzana/bubbleall/BubbleService;->requestLayoutOrientation()V

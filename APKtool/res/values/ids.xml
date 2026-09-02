@@ -317,6 +317,9 @@
     <id name="itemsList" />
     <id name="jumpToEnd" />
     <id name="jumpToStart" />
+    <id name="keyboardDesc" />
+    <id name="keyboardSwitch" />
+    <id name="keyboardTitle" />
     <id name="labeled" />
     <id name="layout" />
     <id name="layoutAdd" />
@@ -602,6 +605,9 @@
     <id name="textTop" />
     <id name="textView" />
     <id name="textWeb" />
+    <id name="transparencyDesc" />
+    <id name="transparencySeek" />
+    <id name="transparencyTitle" />
     <id name="text_input_end_icon" />
     <id name="text_input_error_icon" />
     <id name="text_input_start_icon" />
