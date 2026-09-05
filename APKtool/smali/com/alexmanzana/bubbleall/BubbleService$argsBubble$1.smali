@@ -72,6 +72,22 @@
     const/4 p1, 0x0
 
     :goto_0
+    # restart action: handled before the compiler-generated hash switch
+    const-string v0, "com.alexmanzana.bubbleall.ACTION_RESTART_BUBBLE"
+
+    invoke-static {v0, p1}, Lkotlin/jvm/internal/Intrinsics;->areEqual(Ljava/lang/Object;Ljava/lang/Object;)Z
+
+    move-result v0
+
+    if-eqz v0, :cond_restart
+
+    iget-object p1, p0, Lcom/alexmanzana/bubbleall/BubbleService$argsBubble$1;->this$0:Lcom/alexmanzana/bubbleall/BubbleService;
+
+    invoke-static {p1}, Lcom/alexmanzana/bubbleall/BubbleService;->access$restartBubble(Lcom/alexmanzana/bubbleall/BubbleService;)V
+
+    return-void
+
+    :cond_restart
     if-eqz p1, :cond_6
 
     invoke-virtual {p1}, Ljava/lang/String;->hashCode()I

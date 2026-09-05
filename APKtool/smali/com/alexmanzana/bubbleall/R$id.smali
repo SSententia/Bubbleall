@@ -286,6 +286,36 @@
 
 .field public static transparencyTitle:I = 0x7f0902a5
 
+.field public static keyboardMode0:I = 0x7f0902a6
+
+.field public static keyboardMode1:I = 0x7f0902a7
+
+.field public static keyboardMode2:I = 0x7f0902a8
+
+.field public static keyboardMode3:I = 0x7f0902a9
+
+.field public static restartTitle:I = 0x7f0902aa
+
+.field public static restartDesc:I = 0x7f0902ab
+
+.field public static restartBubble:I = 0x7f0902ac
+
+.field public static restartBubbleImage:I = 0x7f0902ad
+
+.field public static keyboardBar:I = 0x7f0902ae
+
+.field public static keyboardRow1:I = 0x7f0902af
+
+.field public static keyboardRow2:I = 0x7f0902b0
+
+.field public static keyboardRow3:I = 0x7f0902b1
+
+.field public static keyboardRow4:I = 0x7f0902b2
+
+.field public static keyboardRow5:I = 0x7f0902b3
+
+.field public static keyboardRow6:I = 0x7f0902b4
+
 .field public static textInternal:I = 0x7f090250
 
 .field public static textItem:I = 0x7f090251

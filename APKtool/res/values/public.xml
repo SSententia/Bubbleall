@@ -3431,6 +3431,21 @@
     <public type="id" name="transparencyDesc" id="0x7f0902a3" />
     <public type="id" name="transparencySeek" id="0x7f0902a4" />
     <public type="id" name="transparencyTitle" id="0x7f0902a5" />
+    <public type="id" name="keyboardMode0" id="0x7f0902a6" />
+    <public type="id" name="keyboardMode1" id="0x7f0902a7" />
+    <public type="id" name="keyboardMode2" id="0x7f0902a8" />
+    <public type="id" name="keyboardMode3" id="0x7f0902a9" />
+    <public type="id" name="restartTitle" id="0x7f0902aa" />
+    <public type="id" name="restartDesc" id="0x7f0902ab" />
+    <public type="id" name="restartBubble" id="0x7f0902ac" />
+    <public type="id" name="restartBubbleImage" id="0x7f0902ad" />
+    <public type="id" name="keyboardBar" id="0x7f0902ae" />
+    <public type="id" name="keyboardRow1" id="0x7f0902af" />
+    <public type="id" name="keyboardRow2" id="0x7f0902b0" />
+    <public type="id" name="keyboardRow3" id="0x7f0902b1" />
+    <public type="id" name="keyboardRow4" id="0x7f0902b2" />
+    <public type="id" name="keyboardRow5" id="0x7f0902b3" />
+    <public type="id" name="keyboardRow6" id="0x7f0902b4" />
     <public type="integer" name="abc_config_activityDefaultDur" id="0x7f0a0000" />
     <public type="integer" name="abc_config_activityShortDur" id="0x7f0a0001" />
     <public type="integer" name="app_bar_elevation_anim_duration" id="0x7f0a0002" />

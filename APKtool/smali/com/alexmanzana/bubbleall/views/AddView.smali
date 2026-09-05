@@ -164,7 +164,7 @@
 .end method
 
 .method private static final listenerConfig$lambda$0(Lcom/alexmanzana/bubbleall/views/AddView;Landroid/content/Context;)V
-    .locals 12
+    .locals 14
 
     const-string v0, "this$0"
 
@@ -523,40 +523,169 @@
 
     invoke-virtual {v7, v8}, Landroid/widget/SeekBar;->setOnSeekBarChangeListener(Landroid/widget/SeekBar$OnSeekBarChangeListener;)V
 
-    # keyboard Switch: init from prefs, save on toggle
-    sget v7, Lcom/alexmanzana/bubbleall/R$id;->keyboardSwitch:I
+    # keyboard mode chips: init from prefs, save + broadcast on click
+    sget v7, Lcom/alexmanzana/bubbleall/R$id;->keyboardMode0:I
+
+    invoke-virtual {p0, v7}, Lcom/alexmanzana/bubbleall/views/AddView;->findViewById(I)Landroid/view/View;
+
+    move-result-object v9
+
+    sget v7, Lcom/alexmanzana/bubbleall/R$id;->keyboardMode1:I
+
+    invoke-virtual {p0, v7}, Lcom/alexmanzana/bubbleall/views/AddView;->findViewById(I)Landroid/view/View;
+
+    move-result-object v10
+
+    sget v7, Lcom/alexmanzana/bubbleall/R$id;->keyboardMode2:I
+
+    invoke-virtual {p0, v7}, Lcom/alexmanzana/bubbleall/views/AddView;->findViewById(I)Landroid/view/View;
+
+    move-result-object v11
+
+    sget v7, Lcom/alexmanzana/bubbleall/R$id;->keyboardMode3:I
+
+    invoke-virtual {p0, v7}, Lcom/alexmanzana/bubbleall/views/AddView;->findViewById(I)Landroid/view/View;
+
+    move-result-object v12
+
+    const-string v7, "bubble_data_prefs"
+
+    const/4 v8, 0x0
+
+    invoke-virtual {v6, v7, v8}, Landroid/content/Context;->getSharedPreferences(Ljava/lang/String;I)Landroid/content/SharedPreferences;
+
+    move-result-object v7
+
+    const-string v8, "keyboard_mode"
+
+    const/4 v13, 0x0
+
+    invoke-interface {v7, v8, v13}, Landroid/content/SharedPreferences;->getInt(Ljava/lang/String;I)I
+
+    move-result v7
+
+    sget v8, Lcom/alexmanzana/bubbleall/R$drawable;->background_item_color:I
+
+    sget v13, Lcom/alexmanzana/bubbleall/R$drawable;->background_item_color_current:I
+
+    invoke-virtual {v9, v8}, Landroid/view/View;->setBackgroundResource(I)V
+
+    invoke-virtual {v10, v8}, Landroid/view/View;->setBackgroundResource(I)V
+
+    invoke-virtual {v11, v8}, Landroid/view/View;->setBackgroundResource(I)V
+
+    invoke-virtual {v12, v8}, Landroid/view/View;->setBackgroundResource(I)V
+
+    if-nez v7, :cond_kb1
+
+    invoke-virtual {v9, v13}, Landroid/view/View;->setBackgroundResource(I)V
+
+    goto :goto_kb
+
+    :cond_kb1
+    const/4 v8, 0x1
+
+    if-ne v7, v8, :cond_kb2
+
+    invoke-virtual {v10, v13}, Landroid/view/View;->setBackgroundResource(I)V
+
+    goto :goto_kb
+
+    :cond_kb2
+    const/4 v8, 0x2
+
+    if-ne v7, v8, :cond_kb3
+
+    invoke-virtual {v11, v13}, Landroid/view/View;->setBackgroundResource(I)V
+
+    goto :goto_kb
+
+    :cond_kb3
+    const/4 v8, 0x3
+
+    if-ne v7, v8, :goto_kb
+
+    invoke-virtual {v12, v13}, Landroid/view/View;->setBackgroundResource(I)V
+
+    :goto_kb
+    new-instance v7, Lcom/alexmanzana/bubbleall/views/AddView$listenerConfig$1$3;
+
+    move-object v8, v6
+
+    invoke-direct/range {v7 .. v12}, Lcom/alexmanzana/bubbleall/views/AddView$listenerConfig$1$3;-><init>(Landroid/content/Context;Landroid/view/View;Landroid/view/View;Landroid/view/View;Landroid/view/View;)V
+
+    check-cast v7, Landroid/view/View$OnClickListener;
+
+    invoke-virtual {v9, v7}, Landroid/view/View;->setOnClickListener(Landroid/view/View$OnClickListener;)V
+
+    invoke-virtual {v10, v7}, Landroid/view/View;->setOnClickListener(Landroid/view/View$OnClickListener;)V
+
+    invoke-virtual {v11, v7}, Landroid/view/View;->setOnClickListener(Landroid/view/View$OnClickListener;)V
+
+    invoke-virtual {v12, v7}, Landroid/view/View;->setOnClickListener(Landroid/view/View$OnClickListener;)V
+
+    # restart row: theme tint + broadcast on click
+    sget v7, Lcom/alexmanzana/bubbleall/R$id;->restartTitle:I
 
     invoke-virtual {p0, v7}, Lcom/alexmanzana/bubbleall/views/AddView;->findViewById(I)Landroid/view/View;
 
     move-result-object v7
 
-    check-cast v7, Landroid/widget/Switch;
+    check-cast v7, Landroid/widget/TextView;
 
-    const-string v8, "bubble_data_prefs"
+    sget-object v8, Lcom/alexmanzana/bubbleall/utils/BubblePrefs;->Companion:Lcom/alexmanzana/bubbleall/utils/BubblePrefs$Companion;
 
-    const/4 v9, 0x0
-
-    invoke-virtual {v6, v8, v9}, Landroid/content/Context;->getSharedPreferences(Ljava/lang/String;I)Landroid/content/SharedPreferences;
-
-    move-result-object v8
-
-    const-string v9, "key_no_keyboard"
-
-    const/4 v10, 0x0
-
-    invoke-interface {v8, v9, v10}, Landroid/content/SharedPreferences;->getBoolean(Ljava/lang/String;Z)Z
+    invoke-virtual {v8, v6}, Lcom/alexmanzana/bubbleall/utils/BubblePrefs$Companion;->getInternalColors(Landroid/content/Context;)I
 
     move-result v8
 
-    invoke-virtual {v7, v8}, Landroid/widget/Switch;->setChecked(Z)V
+    invoke-virtual {v7, v8}, Landroid/widget/TextView;->setTextColor(I)V
 
-    new-instance v8, Lcom/alexmanzana/bubbleall/views/AddView$listenerConfig$1$3;
+    sget v7, Lcom/alexmanzana/bubbleall/R$id;->restartDesc:I
 
-    invoke-direct {v8, v6}, Lcom/alexmanzana/bubbleall/views/AddView$listenerConfig$1$3;-><init>(Landroid/content/Context;)V
+    invoke-virtual {p0, v7}, Lcom/alexmanzana/bubbleall/views/AddView;->findViewById(I)Landroid/view/View;
 
-    check-cast v8, Landroid/widget/CompoundButton$OnCheckedChangeListener;
+    move-result-object v7
 
-    invoke-virtual {v7, v8}, Landroid/widget/Switch;->setOnCheckedChangeListener(Landroid/widget/CompoundButton$OnCheckedChangeListener;)V
+    check-cast v7, Landroid/widget/TextView;
+
+    sget-object v8, Lcom/alexmanzana/bubbleall/utils/BubblePrefs;->Companion:Lcom/alexmanzana/bubbleall/utils/BubblePrefs$Companion;
+
+    invoke-virtual {v8, v6}, Lcom/alexmanzana/bubbleall/utils/BubblePrefs$Companion;->getInternalColors(Landroid/content/Context;)I
+
+    move-result v8
+
+    invoke-virtual {v7, v8}, Landroid/widget/TextView;->setTextColor(I)V
+
+    sget v7, Lcom/alexmanzana/bubbleall/R$id;->restartBubbleImage:I
+
+    invoke-virtual {p0, v7}, Lcom/alexmanzana/bubbleall/views/AddView;->findViewById(I)Landroid/view/View;
+
+    move-result-object v7
+
+    check-cast v7, Landroid/widget/ImageView;
+
+    sget-object v8, Lcom/alexmanzana/bubbleall/utils/BubblePrefs;->Companion:Lcom/alexmanzana/bubbleall/utils/BubblePrefs$Companion;
+
+    invoke-virtual {v8, v6}, Lcom/alexmanzana/bubbleall/utils/BubblePrefs$Companion;->getInternalColors(Landroid/content/Context;)I
+
+    move-result v8
+
+    invoke-virtual {v7, v8}, Landroid/widget/ImageView;->setColorFilter(I)V
+
+    sget v7, Lcom/alexmanzana/bubbleall/R$id;->restartBubble:I
+
+    invoke-virtual {p0, v7}, Lcom/alexmanzana/bubbleall/views/AddView;->findViewById(I)Landroid/view/View;
+
+    move-result-object v7
+
+    new-instance v8, Lcom/alexmanzana/bubbleall/views/AddView$listenerConfig$1$4;
+
+    invoke-direct {v8, v6}, Lcom/alexmanzana/bubbleall/views/AddView$listenerConfig$1$4;-><init>(Landroid/content/Context;)V
+
+    check-cast v8, Landroid/view/View$OnClickListener;
+
+    invoke-virtual {v7, v8}, Landroid/view/View;->setOnClickListener(Landroid/view/View$OnClickListener;)V
 
     .line 80
 

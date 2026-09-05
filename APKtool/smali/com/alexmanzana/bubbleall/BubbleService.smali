@@ -497,6 +497,15 @@
     return-void
 .end method
 
+.method public static final synthetic access$restartBubble(Lcom/alexmanzana/bubbleall/BubbleService;)V
+    .locals 0
+
+    invoke-direct {p0}, Lcom/alexmanzana/bubbleall/BubbleService;->restartBubble()V
+
+    return-void
+.end method
+
+
 .method public static final synthetic access$requestArgsBubble(Lcom/alexmanzana/bubbleall/BubbleService;Landroid/content/Intent;)V
     .locals 0
 
@@ -2436,7 +2445,7 @@
 .end method
 
 .method private final declareReceiver()V
-    .locals 2
+    .locals 4
 
     .line 93
     new-instance v0, Landroid/content/IntentFilter;
@@ -2462,6 +2471,10 @@
     const-string v1, "com.alexmanzana.bubbleall.ACTION_OPEN_MANAGER"
 
     invoke-virtual {v0, v1}, Landroid/content/IntentFilter;->addAction(Ljava/lang/String;)V
+    # restart action (sent by the config panel)
+    const-string v1, "com.alexmanzana.bubbleall.ACTION_RESTART_BUBBLE"
+
+    invoke-virtual {v0, v1}, Landroid/content/IntentFilter;->addAction(Ljava/lang/String;)V
 
     .line 99
     :try_start_0
@@ -2469,6 +2482,20 @@
 
     check-cast v1, Landroid/content/BroadcastReceiver;
 
+    # API 33+ requires an explicit export flag for app broadcasts
+    sget v2, Landroid/os/Build$VERSION;->SDK_INT:I
+
+    const/16 v3, 0x21
+
+    if-lt v2, v3, :cond_legacy
+
+    const/4 v2, 0x4
+
+    invoke-virtual {p0, v1, v0, v2}, Lcom/alexmanzana/bubbleall/BubbleService;->registerReceiver(Landroid/content/BroadcastReceiver;Landroid/content/IntentFilter;I)Landroid/content/Intent;
+
+    goto :goto_0
+
+    :cond_legacy
     invoke-virtual {p0, v1, v0}, Lcom/alexmanzana/bubbleall/BubbleService;->registerReceiver(Landroid/content/BroadcastReceiver;Landroid/content/IntentFilter;)Landroid/content/Intent;
     :try_end_0
     .catch Ljava/lang/Exception; {:try_start_0 .. :try_end_0} :catch_0
@@ -3178,7 +3205,7 @@
 .end method
 
 .method private final applyAlpha()V
-    .locals 4
+    .locals 8
 
     const-string v0, "bubble_data_prefs"
 
@@ -3194,39 +3221,152 @@
 
     invoke-interface {v0, v1, v2}, Landroid/content/SharedPreferences;->getInt(Ljava/lang/String;I)I
 
-    move-result v0
+    move-result v1
 
-    int-to-float v0, v0
+    int-to-float v1, v1
 
-    const v1, 0x437f0000
+    const v2, 0x437f0000
 
-    div-float/2addr v0, v1
+    div-float/2addr v1, v2
 
-    iget-object v1, p0, Lcom/alexmanzana/bubbleall/BubbleService;->mBubble:Landroid/view/View;
+    const-string v2, "keyboard_mode"
 
-    if-nez v1, :cond_0
+    const/4 v3, 0x0
 
-    const-string v1, "mBubble"
+    invoke-interface {v0, v2, v3}, Landroid/content/SharedPreferences;->getInt(Ljava/lang/String;I)I
 
-    invoke-static {v1}, Lkotlin/jvm/internal/Intrinsics;->throwUninitializedPropertyAccessException(Ljava/lang/String;)V
+    move-result v2
 
-    const/4 v1, 0x0
+    # view-level alpha; fields may still be null when only the bubble is started
+    :try_start_0
+    iget-object v3, p0, Lcom/alexmanzana/bubbleall/BubbleService;->mBubble:Landroid/view/View;
+
+    if-eqz v3, :cond_0
+
+    invoke-virtual {v3, v1}, Landroid/view/View;->setAlpha(F)V
 
     :cond_0
-    invoke-virtual {v1, v0}, Landroid/view/View;->setAlpha(F)V
+    iget-object v3, p0, Lcom/alexmanzana/bubbleall/BubbleService;->mViewManager:Landroid/view/View;
 
-    iget-object v1, p0, Lcom/alexmanzana/bubbleall/BubbleService;->mViewManager:Landroid/view/View;
+    if-eqz v3, :cond_1
 
-    if-nez v1, :cond_1
+    invoke-virtual {v3, v1}, Landroid/view/View;->setAlpha(F)V
 
-    const-string v1, "mViewManager"
+    :cond_1
+    iget-object v3, p0, Lcom/alexmanzana/bubbleall/BubbleService;->mWindowManager:Landroid/view/WindowManager;
 
-    invoke-static {v1}, Lkotlin/jvm/internal/Intrinsics;->throwUninitializedPropertyAccessException(Ljava/lang/String;)V
+    if-eqz v3, :cond_5
+
+    # window-level alpha for the bubble window
+    iget-object v4, p0, Lcom/alexmanzana/bubbleall/BubbleService;->mView:Landroid/widget/LinearLayout;
+
+    iget-object v5, p0, Lcom/alexmanzana/bubbleall/BubbleService;->mViewParams:Landroid/view/WindowManager$LayoutParams;
+
+    if-eqz v4, :cond_2
+
+    if-eqz v5, :cond_2
+
+    invoke-virtual {v4}, Landroid/widget/LinearLayout;->isAttachedToWindow()Z
+
+    move-result v6
+
+    if-eqz v6, :cond_2
+
+    iput v1, v5, Landroid/view/WindowManager$LayoutParams;->alpha:F
+
+    invoke-interface {v3, v4, v5}, Landroid/view/WindowManager;->updateViewLayout(Landroid/view/View;Landroid/view/ViewGroup$LayoutParams;)V
+
+    # window-level alpha + IME suppression flag for the manager window
+    :cond_2
+    iget-object v4, p0, Lcom/alexmanzana/bubbleall/BubbleService;->mViewManager:Landroid/view/View;
+
+    iget-object v5, p0, Lcom/alexmanzana/bubbleall/BubbleService;->mViewManagerParams:Landroid/view/WindowManager$LayoutParams;
+
+    if-eqz v4, :cond_5
+
+    if-eqz v5, :cond_5
+
+    iput v1, v5, Landroid/view/WindowManager$LayoutParams;->alpha:F
+
+    iget v6, v5, Landroid/view/WindowManager$LayoutParams;->flags:I
+
+    const v7, 0x20000
+
+    if-eqz v2, :cond_3
+
+    or-int/2addr v6, v7
+
+    goto :goto_0
+
+    :cond_3
+    not-int v7, v7
+
+    and-int/2addr v6, v7
+
+    :goto_0
+    iput v6, v5, Landroid/view/WindowManager$LayoutParams;->flags:I
+
+    invoke-virtual {v4}, Landroid/view/View;->isAttachedToWindow()Z
+
+    move-result v6
+
+    if-eqz v6, :cond_5
+
+    invoke-interface {v3, v4, v5}, Landroid/view/WindowManager;->updateViewLayout(Landroid/view/View;Landroid/view/ViewGroup$LayoutParams;)V
+
+    :cond_5
+    :try_end_0
+    .catch Ljava/lang/Exception; {:try_start_0 .. :try_end_0} :catch_0
+
+    goto :goto_1
+
+    :catch_0
+    move-exception v0
+
+    invoke-virtual {v0}, Ljava/lang/Exception;->printStackTrace()V
+
+    :goto_1
+    return-void
+.end method
+
+.method private final restartBubble()V
+    .locals 5
+
+    # stop this service, then start it again on the next main-loop turn
+    move-object v0, p0
+
+    check-cast v0, Landroid/content/Context;
+
+    invoke-virtual {v0}, Landroid/content/Context;->getApplicationContext()Landroid/content/Context;
+
+    move-result-object v0
+
+    new-instance v1, Landroid/os/Handler;
+
+    invoke-static {}, Landroid/os/Looper;->getMainLooper()Landroid/os/Looper;
+
+    move-result-object v2
+
+    invoke-direct {v1, v2}, Landroid/os/Handler;-><init>(Landroid/os/Looper;)V
+
+    new-instance v2, Lcom/alexmanzana/bubbleall/BubbleService$restartBubble$1;
+
+    invoke-direct {v2, v0}, Lcom/alexmanzana/bubbleall/BubbleService$restartBubble$1;-><init>(Landroid/content/Context;)V
+
+    check-cast v2, Ljava/lang/Runnable;
+
+    const-wide/16 v3, 0x1f4
+
+    invoke-virtual {v1, v2, v3, v4}, Landroid/os/Handler;->postDelayed(Ljava/lang/Runnable;J)Z
+
+    # Companion.start() toggles isStarting; force it to "running" so start() stops us
+    sget-object v0, Lcom/alexmanzana/bubbleall/BubbleService;->Companion:Lcom/alexmanzana/bubbleall/BubbleService$Companion;
 
     const/4 v1, 0x0
 
-    :cond_1
-    invoke-virtual {v1, v0}, Landroid/view/View;->setAlpha(F)V
+    invoke-virtual {v0, v1}, Lcom/alexmanzana/bubbleall/BubbleService$Companion;->setStarting(Z)V
+
+    invoke-virtual {p0}, Lcom/alexmanzana/bubbleall/BubbleService;->stopSelf()V
 
     return-void
 .end method

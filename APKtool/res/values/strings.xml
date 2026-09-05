@@ -270,8 +270,12 @@ Thanks!"</string>
     <string name="text_favorite">Favorites</string>
     <string name="text_general">General</string>
     <string name="text_go_position">Go to position</string>
-    <string name="text_hide_keyboard">Hide keyboard in browser</string>
-    <string name="text_hide_keyboard_d">Don\'t open keyboard on fields, paste with long press</string>
+    <string name="text_keyboard_builtin">Built-in</string>
+    <string name="text_keyboard_mode">Keyboard in browser</string>
+    <string name="text_keyboard_mode_d">What to show when you tap a field</string>
+    <string name="text_keyboard_nothing">Nothing</string>
+    <string name="text_keyboard_paste">Paste</string>
+    <string name="text_keyboard_system">Keyboard</string>
     <string name="text_info">About</string>
     <string name="text_input_text">Field empty</string>
     <string name="text_items">Access</string>
@@ -311,6 +315,8 @@ Thanks!"</string>
     <string name="text_repeat">Next</string>
     <string name="text_repeat_one">This song</string>
     <string name="text_request_audio_focus">Request audio focus on song</string>
+    <string name="text_restart">Restart bubble</string>
+    <string name="text_restart_d">Close and open the bubble again</string>
     <string name="text_save_shortcut_list">Save shortcut in list</string>
     <string name="text_save_url">Save url</string>
     <string name="text_settings">Settings</string>

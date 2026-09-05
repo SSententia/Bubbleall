@@ -449,37 +449,62 @@
     return-void
 .end method
 
-.method public onCreateInputConnection(Landroid/view/inputmethod/EditorInfo;)Landroid/view/inputmethod/InputConnection;
+.method public final insertText(Ljava/lang/String;)V
     .locals 3
 
-    invoke-virtual {p0}, Lcom/alexmanzana/bubbleall/views/Web;->getContext()Landroid/content/Context;
+    const-string v0, "text"
+
+    invoke-static {p1, v0}, Lkotlin/jvm/internal/Intrinsics;->checkNotNullParameter(Ljava/lang/Object;Ljava/lang/String;)V
+
+    new-instance v0, Ljava/lang/StringBuilder;
+
+    invoke-direct {v0}, Ljava/lang/StringBuilder;-><init>()V
+
+    const-string v1, "(function(t){var e=document.activeElement;if(!e)return;if(e.isContentEditable){document.execCommand('insertText',false,t);return;}if(e.value===undefined)return;var s=e.selectionStart,d=e.selectionEnd;if(s===null||s===undefined){e.value+=t;}else{e.value=e.value.slice(0,s)+t+e.value.slice(d);var p=s+t.length;e.selectionStart=p;e.selectionEnd=p;}e.dispatchEvent(new Event('input',{bubbles:true}));})("
+
+    invoke-virtual {v0, v1}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
+
+    invoke-static {p1}, Lorg/json/JSONObject;->quote(Ljava/lang/String;)Ljava/lang/String;
+
+    move-result-object v1
+
+    invoke-virtual {v0, v1}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
+
+    const-string v1, ");"
+
+    invoke-virtual {v0, v1}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
+
+    invoke-virtual {v0}, Ljava/lang/StringBuilder;->toString()Ljava/lang/String;
 
     move-result-object v0
 
-    const-string v1, "bubble_data_prefs"
+    const/4 v1, 0x0
 
-    const/4 v2, 0x0
+    invoke-virtual {p0, v0, v1}, Lcom/alexmanzana/bubbleall/views/Web;->evaluateJavascript(Ljava/lang/String;Landroid/webkit/ValueCallback;)V
 
-    invoke-virtual {v0, v1, v2}, Landroid/content/Context;->getSharedPreferences(Ljava/lang/String;I)Landroid/content/SharedPreferences;
+    return-void
+.end method
 
-    move-result-object v0
+.method public final deleteText()V
+    .locals 2
 
-    const-string v1, "key_no_keyboard"
+    const-string v0, "(function(){var e=document.activeElement;if(!e)return;if(e.isContentEditable){document.execCommand('delete',false,null);return;}if(e.value===undefined)return;var s=e.selectionStart,d=e.selectionEnd;if(s===null||s===undefined){e.value=e.value.slice(0,-1);}else if(s!==d){e.value=e.value.slice(0,s)+e.value.slice(d);e.selectionStart=s;e.selectionEnd=s;}else if(s>0){e.value=e.value.slice(0,s-1)+e.value.slice(s);e.selectionStart=s-1;e.selectionEnd=s-1;}e.dispatchEvent(new Event('input',{bubbles:true}));})();"
 
-    invoke-interface {v0, v1, v2}, Landroid/content/SharedPreferences;->getBoolean(Ljava/lang/String;Z)Z
+    const/4 v1, 0x0
 
-    move-result v0
+    invoke-virtual {p0, v0, v1}, Lcom/alexmanzana/bubbleall/views/Web;->evaluateJavascript(Ljava/lang/String;Landroid/webkit/ValueCallback;)V
 
-    if-eqz v0, :cond_0
+    return-void
+.end method
 
-    const/4 v0, 0x0
+.method public final enterText()V
+    .locals 2
 
-    return-object v0
+    const-string v0, "(function(){var e=document.activeElement;if(!e)return;var f=e.form;e.dispatchEvent(new KeyboardEvent('keydown',{key:'Enter',keyCode:13,which:13,bubbles:true}));e.dispatchEvent(new KeyboardEvent('keyup',{key:'Enter',keyCode:13,which:13,bubbles:true}));if(f&&typeof f.submit==='function'){if(typeof f.requestSubmit==='function'){f.requestSubmit();}else{f.submit();}}else if(typeof e.blur==='function'){e.blur();}})();"
 
-    :cond_0
-    invoke-super {p0, p1}, Lcom/alexmanzana/bubbleall/views/Web;->onCreateInputConnection(Landroid/view/inputmethod/EditorInfo;)Landroid/view/inputmethod/InputConnection;
+    const/4 v1, 0x0
 
-    move-result-object v0
+    invoke-virtual {p0, v0, v1}, Lcom/alexmanzana/bubbleall/views/Web;->evaluateJavascript(Ljava/lang/String;Landroid/webkit/ValueCallback;)V
 
-    return-object v0
+    return-void
 .end method
