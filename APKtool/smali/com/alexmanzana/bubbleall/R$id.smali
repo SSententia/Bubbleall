@@ -304,6 +304,12 @@
 
 .field public static keyboardBar:I = 0x7f0902ae
 
+.field public static keyboardShift:I = 0x7f0902b5
+
+.field public static keyboard123:I = 0x7f0902b6
+
+.field public static keyboardNumRow:I = 0x7f0902b7
+
 .field public static keyboardRow1:I = 0x7f0902af
 
 .field public static keyboardRow2:I = 0x7f0902b0

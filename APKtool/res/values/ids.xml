@@ -329,6 +329,9 @@
     <id name="restartBubble" />
     <id name="restartBubbleImage" />
     <id name="keyboardBar" />
+    <id name="keyboardShift" />
+    <id name="keyboard123" />
+    <id name="keyboardNumRow" />
     <id name="keyboardRow1" />
     <id name="keyboardRow2" />
     <id name="keyboardRow3" />

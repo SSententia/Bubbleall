@@ -505,7 +505,6 @@
     return-void
 .end method
 
-
 .method public static final synthetic access$requestArgsBubble(Lcom/alexmanzana/bubbleall/BubbleService;Landroid/content/Intent;)V
     .locals 0
 
@@ -2087,7 +2086,18 @@
     :cond_1
     check-cast v3, Landroid/view/View;
 
+    # the view may have been created but never attached (quick start/stop) - ignore
+    :try_start_rv1
     invoke-interface {v0, v3}, Landroid/view/WindowManager;->removeView(Landroid/view/View;)V
+    :try_end_rv1
+    .catch Ljava/lang/Exception; {:try_start_rv1 .. :try_end_rv1} :catch_rv1
+
+    goto :goto_rv1
+
+    :catch_rv1
+    move-exception v0
+
+    :goto_rv1
 
     .line 147
     iget-boolean v0, p0, Lcom/alexmanzana/bubbleall/BubbleService;->isOnlyBubble:Z
@@ -2137,6 +2147,8 @@
 
     move-result-object v7
 
+    # panel windows may not be attached either - best-effort teardown
+    :try_start_rv2
     invoke-virtual {v4, v6, v7}, Lcom/alexmanzana/bubbleall/window/PanelManager;->destroy(ILjava/lang/String;)V
 
     .line 150
@@ -2154,6 +2166,13 @@
     move-result v3
 
     invoke-virtual {v4, v3}, Lcom/alexmanzana/bubbleall/window/PanelManager;->removeView(I)V
+    :try_end_rv2
+    .catch Ljava/lang/Exception; {:try_start_rv2 .. :try_end_rv2} :catch_rv2
+
+    goto :goto_0
+
+    :catch_rv2
+    move-exception v3
 
     goto :goto_0
 
@@ -2182,8 +2201,18 @@
     move-object v2, v1
 
     :goto_1
+    # manager window may never have been attached - ignore
+    :try_start_rv3
     invoke-interface {v0, v2}, Landroid/view/WindowManager;->removeView(Landroid/view/View;)V
+    :try_end_rv3
+    .catch Ljava/lang/Exception; {:try_start_rv3 .. :try_end_rv3} :catch_rv3
 
+    goto :goto_rv3
+
+    :catch_rv3
+    move-exception v0
+
+    :goto_rv3
     :cond_7
     const/4 v0, 0x0
 
@@ -2471,10 +2500,8 @@
     const-string v1, "com.alexmanzana.bubbleall.ACTION_OPEN_MANAGER"
 
     invoke-virtual {v0, v1}, Landroid/content/IntentFilter;->addAction(Ljava/lang/String;)V
-    # restart action (sent by the config panel)
-    const-string v1, "com.alexmanzana.bubbleall.ACTION_RESTART_BUBBLE"
 
-    invoke-virtual {v0, v1}, Landroid/content/IntentFilter;->addAction(Ljava/lang/String;)V
+    # restart is delivered via startService(), not a broadcast
 
     .line 99
     :try_start_0
@@ -3036,20 +3063,15 @@
 .method private final modifyBubble()V
     .locals 5
 
-    .line 114
-    iget-object v0, p0, Lcom/alexmanzana/bubbleall/BubbleService;->adapter:Lcom/alexmanzana/bubbleall/adapters/AdapterPanels;
-
+    # null for the lateinit-fallback move-object v0, v1 paths below
     const/4 v1, 0x0
 
-    if-nez v0, :cond_0
+    .line 114
+    # adapter does not exist in bubble-only mode; skip the recycler refresh
+    iget-object v0, p0, Lcom/alexmanzana/bubbleall/BubbleService;->adapter:Lcom/alexmanzana/bubbleall/adapters/AdapterPanels;
 
-    const-string v0, "adapter"
+    if-eqz v0, :cond_skip_adapter
 
-    invoke-static {v0}, Lkotlin/jvm/internal/Intrinsics;->throwUninitializedPropertyAccessException(Ljava/lang/String;)V
-
-    move-object v0, v1
-
-    :cond_0
     iget-object v2, p0, Lcom/alexmanzana/bubbleall/BubbleService;->panels:Ljava/util/ArrayList;
 
     invoke-virtual {v2}, Ljava/util/ArrayList;->size()I
@@ -3060,7 +3082,7 @@
 
     invoke-virtual {v0, v3, v2}, Lcom/alexmanzana/bubbleall/adapters/AdapterPanels;->notifyItemRangeChanged(II)V
 
-    .line 115
+    :cond_skip_adapter
     sget-object v0, Lcom/alexmanzana/bubbleall/utils/BubblePrefs;->Companion:Lcom/alexmanzana/bubbleall/utils/BubblePrefs$Companion;
 
     move-object v2, p0
@@ -3131,17 +3153,11 @@
 
     .line 126
     :goto_0
+    # manager window may not exist in bubble-only mode
     iget-object v0, p0, Lcom/alexmanzana/bubbleall/BubbleService;->mViewManager:Landroid/view/View;
 
-    if-nez v0, :cond_6
+    if-eqz v0, :cond_skip_manager
 
-    const-string v0, "mViewManager"
-
-    invoke-static {v0}, Lkotlin/jvm/internal/Intrinsics;->throwUninitializedPropertyAccessException(Ljava/lang/String;)V
-
-    move-object v0, v1
-
-    :cond_6
     sget v3, Lcom/alexmanzana/bubbleall/R$id;->contentLayout:I
 
     invoke-virtual {v0, v3}, Landroid/view/View;->findViewById(I)Landroid/view/View;
@@ -3160,6 +3176,7 @@
 
     invoke-virtual {v0, v3}, Landroid/graphics/drawable/Drawable;->setTint(I)V
 
+    :cond_skip_manager
     .line 127
     iget-object v0, p0, Lcom/alexmanzana/bubbleall/BubbleService;->mBubble:Landroid/view/View;
 
@@ -3183,22 +3200,14 @@
     invoke-virtual {v0, v2}, Landroid/graphics/drawable/Drawable;->setTint(I)V
 
     .line 128
+    # PanelManager may not exist in bubble-only mode
     iget-object v0, p0, Lcom/alexmanzana/bubbleall/BubbleService;->mPanelManager:Lcom/alexmanzana/bubbleall/window/PanelManager;
 
-    if-nez v0, :cond_8
+    if-eqz v0, :cond_skip_pm
 
-    const-string v0, "mPanelManager"
+    invoke-virtual {v0}, Lcom/alexmanzana/bubbleall/window/PanelManager;->refreshStyle()V
 
-    invoke-static {v0}, Lkotlin/jvm/internal/Intrinsics;->throwUninitializedPropertyAccessException(Ljava/lang/String;)V
-
-    goto :goto_1
-
-    :cond_8
-    move-object v1, v0
-
-    :goto_1
-    invoke-virtual {v1}, Lcom/alexmanzana/bubbleall/window/PanelManager;->refreshStyle()V
-
+    :cond_skip_pm
     invoke-direct {p0}, Lcom/alexmanzana/bubbleall/BubbleService;->applyAlpha()V
 
     return-void
@@ -3314,6 +3323,14 @@
 
     invoke-interface {v3, v4, v5}, Landroid/view/WindowManager;->updateViewLayout(Landroid/view/View;Landroid/view/ViewGroup$LayoutParams;)V
 
+    # switching to a suppressed mode (1/2/3): an already-open system IME
+    # stays up until dismissed, so hide it and drop the WebView focus
+    if-eqz v2, :cond_5
+
+    const/4 v6, 0x0
+
+    invoke-direct {p0, v6}, Lcom/alexmanzana/bubbleall/BubbleService;->hideSystemIme(I)V
+
     :cond_5
     :try_end_0
     .catch Ljava/lang/Exception; {:try_start_0 .. :try_end_0} :catch_0
@@ -3329,44 +3346,165 @@
     return-void
 .end method
 
-.method private final restartBubble()V
-    .locals 5
+.method private final hideSystemIme(I)V
+    .locals 4
 
-    # stop this service, then start it again on the next main-loop turn
-    move-object v0, p0
-
-    check-cast v0, Landroid/content/Context;
-
-    invoke-virtual {v0}, Landroid/content/Context;->getApplicationContext()Landroid/content/Context;
-
-    move-result-object v0
-
-    new-instance v1, Landroid/os/Handler;
-
-    invoke-static {}, Landroid/os/Looper;->getMainLooper()Landroid/os/Looper;
-
-    move-result-object v2
-
-    invoke-direct {v1, v2}, Landroid/os/Handler;-><init>(Landroid/os/Looper;)V
-
-    new-instance v2, Lcom/alexmanzana/bubbleall/BubbleService$restartBubble$1;
-
-    invoke-direct {v2, v0}, Lcom/alexmanzana/bubbleall/BubbleService$restartBubble$1;-><init>(Landroid/content/Context;)V
-
-    check-cast v2, Ljava/lang/Runnable;
-
-    const-wide/16 v3, 0x1f4
-
-    invoke-virtual {v1, v2, v3, v4}, Landroid/os/Handler;->postDelayed(Ljava/lang/Runnable;J)Z
-
-    # Companion.start() toggles isStarting; force it to "running" so start() stops us
-    sget-object v0, Lcom/alexmanzana/bubbleall/BubbleService;->Companion:Lcom/alexmanzana/bubbleall/BubbleService$Companion;
+    # close the system keyboard over the browser panel (modes 1/2/3)
+    iget-object v0, p0, Lcom/alexmanzana/bubbleall/BubbleService;->mViewManager:Landroid/view/View;
 
     const/4 v1, 0x0
 
-    invoke-virtual {v0, v1}, Lcom/alexmanzana/bubbleall/BubbleService$Companion;->setStarting(Z)V
+    if-nez v0, :cond_0
 
-    invoke-virtual {p0}, Lcom/alexmanzana/bubbleall/BubbleService;->stopSelf()V
+    const-string v0, "mViewManager"
+
+    invoke-static {v0}, Lkotlin/jvm/internal/Intrinsics;->throwUninitializedPropertyAccessException(Ljava/lang/String;)V
+
+    move-object v0, v1
+
+    :cond_0
+    invoke-virtual {v0}, Landroid/view/View;->getWindowToken()Landroid/os/IBinder;
+
+    move-result-object v0
+
+    if-eqz v0, :cond_3
+
+    const-string v1, "input_method"
+
+    invoke-virtual {p0, v1}, Lcom/alexmanzana/bubbleall/BubbleService;->getSystemService(Ljava/lang/String;)Ljava/lang/Object;
+
+    move-result-object v1
+
+    check-cast v1, Landroid/view/inputmethod/InputMethodManager;
+
+    invoke-virtual {v1, v0, p1}, Landroid/view/inputmethod/InputMethodManager;->hideSoftInputFromWindow(Landroid/os/IBinder;I)Z
+
+    move-result v2
+
+    if-eqz v2, :cond_3
+
+    return-void
+
+    :cond_3
+    iget-object v2, p0, Lcom/alexmanzana/bubbleall/BubbleService;->mPanelManager:Lcom/alexmanzana/bubbleall/window/PanelManager;
+
+    if-eqz v2, :cond_4
+
+    invoke-virtual {v2}, Lcom/alexmanzana/bubbleall/window/PanelManager;->clearFocus()Z
+
+    :cond_4
+    return-void
+.end method
+
+.method private final restartBubble()V
+    .locals 5
+
+    # in-place teardown: onStartCommand() detects ACTION_RESTART_BUBBLE,
+    # calls this, then falls through to the normal boot path in the SAME
+    # service instance - no stopSelf, no delayed start, no broadcast
+    const/4 v0, 0x0
+
+    # cancel every pending handler callback (animations, delayed jumps)
+    iget-object v1, p0, Lcom/alexmanzana/bubbleall/BubbleService;->mHandler:Landroid/os/Handler;
+
+    if-eqz v1, :cond_0
+
+    invoke-virtual {v1, v0}, Landroid/os/Handler;->removeCallbacksAndMessages(Ljava/lang/Object;)V
+
+    # manager window: remove if attached; the boot path re-adds it
+    :cond_0
+    iget-object v1, p0, Lcom/alexmanzana/bubbleall/BubbleService;->mViewManager:Landroid/view/View;
+
+    if-eqz v1, :cond_2
+
+    invoke-virtual {v1}, Landroid/view/View;->isAttachedToWindow()Z
+
+    move-result v2
+
+    if-eqz v2, :cond_2
+
+    :try_start_0
+    iget-object v2, p0, Lcom/alexmanzana/bubbleall/BubbleService;->mWindowManager:Landroid/view/WindowManager;
+
+    if-eqz v2, :cond_1
+
+    invoke-interface {v2, v1}, Landroid/view/WindowManager;->removeView(Landroid/view/View;)V
+
+    :cond_1
+    :try_end_0
+    .catch Ljava/lang/Exception; {:try_start_0 .. :try_end_0} :catch_0
+
+    goto :cond_2
+
+    :catch_0
+    move-exception v1
+
+    invoke-virtual {v1}, Ljava/lang/Exception;->printStackTrace()V
+
+    # browser panels: destroy every tab and clear the panel list
+    :cond_2
+    iget-object v1, p0, Lcom/alexmanzana/bubbleall/BubbleService;->mPanelManager:Lcom/alexmanzana/bubbleall/window/PanelManager;
+
+    if-eqz v1, :cond_5
+
+    iget-object v2, p0, Lcom/alexmanzana/bubbleall/BubbleService;->panels:Ljava/util/ArrayList;
+
+    invoke-virtual {v2}, Ljava/util/ArrayList;->iterator()Ljava/util/Iterator;
+
+    move-result-object v2
+
+    :goto_0
+    invoke-interface {v2}, Ljava/util/Iterator;->hasNext()Z
+
+    move-result v3
+
+    if-eqz v3, :cond_4
+
+    invoke-interface {v2}, Ljava/util/Iterator;->next()Ljava/lang/Object;
+
+    move-result-object v3
+
+    check-cast v3, Lcom/alexmanzana/bubbleall/pojos/ItemPanel;
+
+    :try_start_1
+    invoke-virtual {v3}, Lcom/alexmanzana/bubbleall/pojos/ItemPanel;->getResourceId()I
+
+    move-result v4
+
+    invoke-virtual {v3}, Lcom/alexmanzana/bubbleall/pojos/ItemPanel;->getId()Ljava/lang/String;
+
+    move-result-object v3
+
+    invoke-virtual {v1, v4, v3}, Lcom/alexmanzana/bubbleall/window/PanelManager;->destroy(ILjava/lang/String;)V
+
+    invoke-virtual {v1, v4}, Lcom/alexmanzana/bubbleall/window/PanelManager;->removeView(I)V
+
+    :try_end_1
+    .catch Ljava/lang/Exception; {:try_start_1 .. :try_end_1} :catch_1
+
+    goto :goto_0
+
+    :catch_1
+    move-exception v3
+
+    invoke-virtual {v3}, Ljava/lang/Exception;->printStackTrace()V
+
+    goto :goto_0
+
+    :cond_4
+    iget-object v1, p0, Lcom/alexmanzana/bubbleall/BubbleService;->panels:Ljava/util/ArrayList;
+
+    invoke-virtual {v1}, Ljava/util/ArrayList;->clear()V
+
+    # reset flags so the boot path rebuilds from scratch
+    :cond_5
+    iput-boolean v0, p0, Lcom/alexmanzana/bubbleall/BubbleService;->isOpenManager:Z
+
+    iput-boolean v0, p0, Lcom/alexmanzana/bubbleall/BubbleService;->isInitManger:Z
+
+    const/4 v1, 0x1
+
+    sput-boolean v1, Lcom/alexmanzana/bubbleall/BubbleService;->isStarting:Z
 
     return-void
 .end method
@@ -4724,7 +4862,30 @@
 
     move-object/from16 v0, p0
 
-    .line 251
+    # restart request: tear everything down in place, then fall through to
+    # the normal boot path below with a null intent (manager-first startup)
+    if-eqz p1, :cond_restart_done
+
+    invoke-virtual/range {p1 .. p1}, Landroid/content/Intent;->getAction()Ljava/lang/String;
+
+    move-result-object v1
+
+    const-string v2, "com.alexmanzana.bubbleall.ACTION_RESTART_BUBBLE"
+
+    invoke-static {v2, v1}, Lkotlin/jvm/internal/Intrinsics;->areEqual(Ljava/lang/Object;Ljava/lang/Object;)Z
+
+    move-result v1
+
+    if-eqz v1, :cond_restart_done
+
+    invoke-direct/range {p0 .. p0}, Lcom/alexmanzana/bubbleall/BubbleService;->restartBubble()V
+
+    # null the intent so the boot path below takes the manager-first branch
+    const/4 v1, 0x0
+
+    move-object/from16 p1, v1
+
+    :cond_restart_done
     new-instance v1, Landroid/widget/LinearLayout;
 
     move-object v2, v0

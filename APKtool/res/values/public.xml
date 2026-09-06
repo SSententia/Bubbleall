@@ -3440,6 +3440,9 @@
     <public type="id" name="restartBubble" id="0x7f0902ac" />
     <public type="id" name="restartBubbleImage" id="0x7f0902ad" />
     <public type="id" name="keyboardBar" id="0x7f0902ae" />
+    <public type="id" name="keyboardShift" id="0x7f0902b5" />
+    <public type="id" name="keyboard123" id="0x7f0902b6" />
+    <public type="id" name="keyboardNumRow" id="0x7f0902b7" />
     <public type="id" name="keyboardRow1" id="0x7f0902af" />
     <public type="id" name="keyboardRow2" id="0x7f0902b0" />
     <public type="id" name="keyboardRow3" id="0x7f0902b1" />

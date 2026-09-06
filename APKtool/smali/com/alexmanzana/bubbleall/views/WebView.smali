@@ -74,6 +74,8 @@
 
 
 # instance fields
+.field public fieldFocused:Z
+
 .field private final addButton:Ljava/lang/Runnable;
 
 .field private currentWeb:I
@@ -87,6 +89,12 @@
 .field private final tabsButton:Ljava/lang/Runnable;
 
 .field private network:Landroid/net/ConnectivityManager$NetworkCallback;
+
+.field public final fieldPoll:Ljava/lang/Runnable;
+
+.field public fieldPollHandler:Landroid/os/Handler;
+
+.field public fieldPollStop:Z
 
 
 # direct methods
@@ -163,7 +171,7 @@
 .end method
 
 .method public constructor <init>(Landroid/content/Context;Landroid/util/AttributeSet;I)V
-    .locals 1
+    .locals 2
 
     const-string v0, "context"
 
@@ -197,6 +205,30 @@
     invoke-direct {p2, p0, p1}, Lcom/alexmanzana/bubbleall/views/WebView$$ExternalSyntheticLambda2;-><init>(Lcom/alexmanzana/bubbleall/views/WebView;Landroid/content/Context;)V
 
     iput-object p2, p0, Lcom/alexmanzana/bubbleall/views/WebView;->addButton:Ljava/lang/Runnable;
+
+    # focus poll: clears fieldFocused up front so a stale bar hides quickly
+    new-instance p2, Lcom/alexmanzana/bubbleall/views/WebView$focusPoll$1;
+
+    invoke-direct {p2, p0}, Lcom/alexmanzana/bubbleall/views/WebView$focusPoll$1;-><init>(Lcom/alexmanzana/bubbleall/views/WebView;)V
+
+    iput-object p2, p0, Lcom/alexmanzana/bubbleall/views/WebView;->fieldPoll:Ljava/lang/Runnable;
+
+    # shared main-looper handler for the poll loop + stop flag
+    new-instance p2, Landroid/os/Handler;
+
+    invoke-static {}, Landroid/os/Looper;->getMainLooper()Landroid/os/Looper;
+
+    move-result-object p3
+
+    invoke-direct {p2, p3}, Landroid/os/Handler;-><init>(Landroid/os/Looper;)V
+
+    iput-object p2, p0, Lcom/alexmanzana/bubbleall/views/WebView;->fieldPollHandler:Landroid/os/Handler;
+
+    const/4 p2, 0x0
+
+    iput-boolean p2, p0, Lcom/alexmanzana/bubbleall/views/WebView;->fieldPollStop:Z
+
+    iput-boolean p2, p0, Lcom/alexmanzana/bubbleall/views/WebView;->fieldFocused:Z
 
     return-void
 .end method
@@ -243,7 +275,11 @@
 .end method
 
 .method private static final addButton$lambda$8(Lcom/alexmanzana/bubbleall/views/WebView;Landroid/content/Context;)V
-    .locals 7
+    .locals 8
+
+    # keep the WebView in v7: p0 is reassigned to the page URL below, and
+    # the merged tail calls startFieldPoll() on the receiver
+    move-object v7, p0
 
     const-string v0, "this$0"
 
@@ -374,6 +410,9 @@
     .line 274
     :goto_1
     invoke-virtual {v0}, Lcom/alexmanzana/bubbleall/views/Web;->requestFocus()Z
+
+    # new tab created: the poll was stopped in pause(), restart it
+    invoke-virtual {v7}, Lcom/alexmanzana/bubbleall/views/WebView;->startFieldPoll()V
 
     return-void
 .end method
@@ -1277,7 +1316,7 @@
     .line 313
     invoke-direct {p0}, Lcom/alexmanzana/bubbleall/views/WebView;->finishMenu()V
 
-    invoke-direct {p0}, Lcom/alexmanzana/bubbleall/views/WebView;->hideKeyboardBar()V
+    invoke-virtual {p0}, Lcom/alexmanzana/bubbleall/views/WebView;->stopFieldPoll()V
 
     invoke-direct {p0}, Lcom/alexmanzana/bubbleall/views/WebView;->unregisterNetwork()V
 
@@ -1895,7 +1934,8 @@
     .line 97
     invoke-direct {p0}, Lcom/alexmanzana/bubbleall/views/WebView;->finishMenu()V
 
-    invoke-direct {p0}, Lcom/alexmanzana/bubbleall/views/WebView;->hideKeyboardBar()V
+    # new tab / panel switch: stop polling, hide bar (restarted by start())
+    invoke-virtual {p0}, Lcom/alexmanzana/bubbleall/views/WebView;->stopFieldPoll()V
 
     return-void
 .end method
@@ -1987,7 +2027,7 @@
 .end method
 
 .method private final showKeyboardBar()V
-    .locals 11
+    .locals 13
 
     invoke-direct {p0}, Lcom/alexmanzana/bubbleall/views/WebView;->keyboardBar()Landroid/view/ViewGroup;
 
@@ -2039,6 +2079,10 @@
 
     sget v6, Lcom/alexmanzana/bubbleall/R$id;->keyboardRow6:I
 
+    sget v11, Lcom/alexmanzana/bubbleall/R$id;->keyboardNumRow:I
+
+    sget v12, Lcom/alexmanzana/bubbleall/R$id;->keyboardRow5:I
+
     new-instance v7, Lcom/alexmanzana/bubbleall/views/WebView$keyListener$1;
 
     invoke-direct {v7, p0}, Lcom/alexmanzana/bubbleall/views/WebView$keyListener$1;-><init>(Lcom/alexmanzana/bubbleall/views/WebView;)V
@@ -2058,18 +2102,35 @@
 
     move-result v10
 
-    if-ne v10, v6, :cond_2
+    # row type: 0 = paste row (always), 1 = letter rows (mode 1),
+    # 2 = symbol rows (toggled by the ?123 key only)
+    if-ne v10, v6, :cond_t1
 
-    move v10, v3
+    const/4 v10, 0x0
 
     goto :goto_1
 
-    :cond_2
-    move v10, v4
+    :cond_t1
+    if-ne v10, v11, :cond_t2
+
+    const/4 v10, 0x2
+
+    goto :goto_1
+
+    :cond_t2
+    if-ne v10, v12, :cond_t3
+
+    const/4 v10, 0x2
+
+    goto :goto_1
+
+    :cond_t3
+    const/4 v10, 0x1
 
     :goto_1
-    # paste row visible in both modes; letter rows only in mode 1
     if-eqz v10, :cond_3
+
+    if-ne v10, v4, :cond_4
 
     if-ne v2, v4, :cond_4
 
@@ -2129,6 +2190,117 @@
     goto :goto_0
 
     :cond_0
+    return-void
+.end method
+
+.method public final startFieldPoll()V
+    .locals 4
+
+    # poll document.activeElement while modes 1/2 drive the custom bar
+    invoke-virtual {p0}, Lcom/alexmanzana/bubbleall/views/WebView;->getContext()Landroid/content/Context;
+
+    move-result-object v0
+
+    const-string v1, "bubble_data_prefs"
+
+    const/4 v2, 0x0
+
+    invoke-virtual {v0, v1, v2}, Landroid/content/Context;->getSharedPreferences(Ljava/lang/String;I)Landroid/content/SharedPreferences;
+
+    move-result-object v0
+
+    const-string v1, "keyboard_mode"
+
+    invoke-interface {v0, v1, v2}, Landroid/content/SharedPreferences;->getInt(Ljava/lang/String;I)I
+
+    move-result v0
+
+    if-eqz v0, :cond_0
+
+    const/4 v1, 0x1
+
+    if-eq v0, v1, :cond_1
+
+    const/4 v1, 0x2
+
+    if-eq v0, v1, :cond_1
+
+    :cond_0
+    invoke-direct {p0}, Lcom/alexmanzana/bubbleall/views/WebView;->hideKeyboardBar()V
+
+    return-void
+
+    :cond_1
+    # reset stop flag and cancel any pending post before restarting
+    const/4 v1, 0x0
+
+    iput-boolean v1, p0, Lcom/alexmanzana/bubbleall/views/WebView;->fieldPollStop:Z
+
+    iget-object v1, p0, Lcom/alexmanzana/bubbleall/views/WebView;->fieldPollHandler:Landroid/os/Handler;
+
+    if-eqz v1, :cond_2
+
+    iget-object v2, p0, Lcom/alexmanzana/bubbleall/views/WebView;->fieldPoll:Ljava/lang/Runnable;
+
+    invoke-virtual {v1, v2}, Landroid/os/Handler;->removeCallbacks(Ljava/lang/Runnable;)V
+
+    :cond_2
+    # run the poll once immediately; it requeues itself every 300 ms
+    iget-object v0, p0, Lcom/alexmanzana/bubbleall/views/WebView;->fieldPoll:Ljava/lang/Runnable;
+
+    invoke-interface {v0}, Ljava/lang/Runnable;->run()V
+
+    return-void
+.end method
+
+.method public final stopFieldPoll()V
+    .locals 2
+
+    # stop flag first: an already-pending post becomes a no-op when it fires
+    const/4 v0, 0x1
+
+    iput-boolean v0, p0, Lcom/alexmanzana/bubbleall/views/WebView;->fieldPollStop:Z
+
+    # cancel the pending post on the shared handler
+    iget-object v0, p0, Lcom/alexmanzana/bubbleall/views/WebView;->fieldPollHandler:Landroid/os/Handler;
+
+    if-eqz v0, :cond_0
+
+    iget-object v1, p0, Lcom/alexmanzana/bubbleall/views/WebView;->fieldPoll:Ljava/lang/Runnable;
+
+    invoke-virtual {v0, v1}, Landroid/os/Handler;->removeCallbacks(Ljava/lang/Runnable;)V
+
+    :cond_0
+    const/4 v0, 0x0
+
+    iput-boolean v0, p0, Lcom/alexmanzana/bubbleall/views/WebView;->fieldFocused:Z
+
+    invoke-direct {p0}, Lcom/alexmanzana/bubbleall/views/WebView;->hideKeyboardBar()V
+
+    return-void
+.end method
+
+.method public final onFieldFocusResult(Z)V
+    .locals 1
+
+    # evaluateJavascript callback; show/hide only on a state flip
+    iget-boolean v0, p0, Lcom/alexmanzana/bubbleall/views/WebView;->fieldFocused:Z
+
+    if-eq v0, p1, :cond_end
+
+    iput-boolean p1, p0, Lcom/alexmanzana/bubbleall/views/WebView;->fieldFocused:Z
+
+    if-eqz p1, :cond_hide
+
+    invoke-direct {p0}, Lcom/alexmanzana/bubbleall/views/WebView;->showKeyboardBar()V
+
+    goto :goto_end
+
+    :cond_hide
+    invoke-direct {p0}, Lcom/alexmanzana/bubbleall/views/WebView;->hideKeyboardBar()V
+
+    :cond_end
+    :goto_end
     return-void
 .end method
 
@@ -2341,8 +2513,10 @@
     .line 108
     invoke-direct {p0}, Lcom/alexmanzana/bubbleall/views/WebView;->title()V
 
-    # keyboard bar follows the browser panel
-    invoke-direct {p0}, Lcom/alexmanzana/bubbleall/views/WebView;->showKeyboardBar()V
+    # keyboard bar follows page focus, not panel start
+    invoke-direct {p0}, Lcom/alexmanzana/bubbleall/views/WebView;->hideKeyboardBar()V
+
+    invoke-virtual {p0}, Lcom/alexmanzana/bubbleall/views/WebView;->startFieldPoll()V
 
     return-void
 .end method
