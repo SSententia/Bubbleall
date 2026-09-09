@@ -227,3 +227,25 @@ own listener; other bar interactions unchanged.
 NOTE: first attempt placed the attribute OUTSIDE the tags (stray text; aapt2
 ignored it silently and built anyway) - corrected placement verified
 (`<LinearLayout android:clickable="true" ...>` inside the tag, 8 containers).
+
+## Round: keyboard UX improvements (post-stabilization)
+
+- **?123 toggle now fully works**: the number row AND the previously orphaned symbol row both toggle (the symbol row was in the layout but never wired into `toggleSymbols`).
+- **Symbol row enriched**: added `. , ? ! ' # % * + =` alongside the original `- / : ; ( ) & @ "` (some of these were untypeable before).
+- **Keyboard-dismiss key**: new `⌄` key on the bottom row (tag `#hide`) calls `dismissKeyboardBar()` — blurs the page so the poll keeps the bar hidden until the next focus.
+- **Bottom-of-page fields**: the focus poll now scroll-into-views a focused field when it sits within 240 px of the viewport bottom, so the bar no longer covers it.
+- **Menu/tab-strip overlap**: the poll JS now returns a tri-state (0 field / 1 no field / 2 overlay-open); `onFieldFocusResult(I)` became a small state machine so the bar hides while the browser menu or tab strip is open and returns automatically on close. The poll is no longer stopped in `pause()` (that was also why a fresh tab could lose the bar until re-focus).
+- **Tab-strip reselect**: reselecting a tab after closing one (swipe path, `onRemove`) now restarts the focus poll.
+- Tab persistence across restarts: no code change — the app already has it under Settings → Browser → "Open pages" (default off); user will enable it.
+
+## Round: user retest follow-ups (2026-09-08)
+
+- **?123 reverts after ~300 ms**: the poll's state machine called `showKeyboardBar()` every tick, and that method forced row visibility on each call, wiping the toggle. Fix: `onFieldFocusResult(I)` now only calls `showKeyboardBar()` on the *transition* into the focused state (`fieldFocused` doubles as "bar visible"), and `showKeyboardBar()` early-returns while the bar is already visible. `pollState` keeps the raw last poll result.
+- **`#hide` key pasted "#hide"**: its dispatch block was dead code — the `#123` branch jumped straight to `:cond_3`, so the `#hide` tag fell through to `insertText()`. Fix: `#123` now jumps to `:cond_2h` when it doesn't match.
+- **Symbols row cramped / missing math keys**: split into two rows — `keyboardRow5` (16 punct keys, fixed the `(`→`)` tag typo) and new `keyboardRow7` (id `0x7f0902b8`, added to ids.xml/public.xml/R$id) with `! # % * + = √ × ÷ < >`. Both rows are type-2 (toggled by ?123) in `showKeyboardBar()` and both flip in `toggleSymbols()`.
+- **Bottom-anchored field unreachable**: instead of only scrollIntoView, the visible-bar JS now adds `document.scrollingElement.style.paddingBottom='280px'` (mimics the system IME resizing the viewport); the bar-hidden JS and `stopFieldPoll()` clear it. scrollIntoView only runs while the bar is actually shown.
+- **Bar persists over menu/tab strip/Add/Settings**: the poll now checks `WebView.getVisibility()`, `currentTab()` visibility and `isShown()`; when the browser panel isn't shown it feeds state 2 (hide bar, keep polling) — covers every panel and overlay without new plumbing.
+- **Bubble vs opened-bubble opacity difference (root cause found)**: `applyAlpha()` ran at boot, before `mViewManagerParams` existed, so the manager window never received the user's window alpha; the closed bubble did. Fix: `open$lambda$6` calls `applyAlpha()` right after the manager window is attached.
+- **App vanishing / broken bubble with other apps open**: this is the OS killing the backgrounded service process (bubble-only apps are prime targets; no crash log because it's an LMK kill, not a Java crash). `onStartCommand` returns `START_STICKY`-equivalent and the service calls `startForeground()`, but OEM (ColorOS) aggressive killing can still end it. Advise the user to enable "Lock" / "Allow auto-start" / battery-optimization exemption for BubbleAll in system settings — not fixable purely in smali.
+
+Build: OK (fixed a duplicated-label assembly error in focusPoll$1 left by a partial edit). New symbols verified in built dex + resources.

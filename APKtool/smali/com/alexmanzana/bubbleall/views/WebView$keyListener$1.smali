@@ -69,9 +69,25 @@
 
     move-result v2
 
-    if-eqz v2, :cond_3
+    if-eqz v2, :cond_2h
 
     invoke-direct {p0}, Lcom/alexmanzana/bubbleall/views/WebView$keyListener$1;->toggleSymbols()V
+
+    return-void
+
+    # hide: blur the field and dismiss the bar (like the system back gesture)
+    :cond_2h
+    const-string v2, "#hide"
+
+    invoke-virtual {v2, v1}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
+
+    move-result v2
+
+    if-eqz v2, :cond_3
+
+    iget-object v2, p0, Lcom/alexmanzana/bubbleall/views/WebView$keyListener$1;->this$0:Lcom/alexmanzana/bubbleall/views/WebView;
+
+    invoke-virtual {v2}, Lcom/alexmanzana/bubbleall/views/WebView;->dismissKeyboardBar()V
 
     return-void
 
@@ -334,7 +350,7 @@
 
 .method private final toggleSymbols()V    .locals 5
 
-    # swap letter rows and the number/symbol row
+    # swap letter rows with the number row and the symbol row
     iget-object v0, p0, Lcom/alexmanzana/bubbleall/views/WebView$keyListener$1;->this$0:Lcom/alexmanzana/bubbleall/views/WebView;
 
     invoke-virtual {v0}, Lcom/alexmanzana/bubbleall/views/WebView;->getRootView()Landroid/view/View;
@@ -365,68 +381,103 @@
 
     move-result v2
 
-    if-eqz v2, :sym_visible
+    # the new visibility for both toggle rows
+    if-eqz v2, :to_gone
 
     const/4 v3, 0x0
 
+    goto :apply_num
+
+    :to_gone
+    const/16 v3, 0x8
+
+    :apply_num
     invoke-virtual {v1, v3}, Landroid/view/View;->setVisibility(I)V
 
+    sget v1, Lcom/alexmanzana/bubbleall/R$id;->keyboardRow5:I
+
+    invoke-virtual {v0, v1}, Landroid/view/ViewGroup;->findViewById(I)Landroid/view/View;
+
+    move-result-object v1
+
+    if-eqz v1, :skip_r5
+
+    invoke-virtual {v1, v3}, Landroid/view/View;->setVisibility(I)V
+
+    :skip_r5
+    sget v1, Lcom/alexmanzana/bubbleall/R$id;->keyboardRow7:I
+
+    invoke-virtual {v0, v1}, Landroid/view/ViewGroup;->findViewById(I)Landroid/view/View;
+
+    move-result-object v1
+
+    if-eqz v1, :cond_end
+
+    invoke-virtual {v1, v3}, Landroid/view/View;->setVisibility(I)V
+
+    # letter rows always flip opposite to the toggle rows
     sget v1, Lcom/alexmanzana/bubbleall/R$id;->keyboardRow1:I
 
     invoke-virtual {v0, v1}, Landroid/view/ViewGroup;->findViewById(I)Landroid/view/View;
 
     move-result-object v1
 
-    const/16 v3, 0x8
+    if-eqz v1, :skip_r1
 
-    invoke-virtual {v1, v3}, Landroid/view/View;->setVisibility(I)V
-
-    sget v1, Lcom/alexmanzana/bubbleall/R$id;->keyboardRow2:I
-
-    invoke-virtual {v0, v1}, Landroid/view/ViewGroup;->findViewById(I)Landroid/view/View;
-
-    move-result-object v1
-
-    invoke-virtual {v1, v3}, Landroid/view/View;->setVisibility(I)V
-
-    sget v1, Lcom/alexmanzana/bubbleall/R$id;->keyboardRow3:I
-
-    invoke-virtual {v0, v1}, Landroid/view/ViewGroup;->findViewById(I)Landroid/view/View;
-
-    move-result-object v1
-
-    invoke-virtual {v1, v3}, Landroid/view/View;->setVisibility(I)V
-
-    goto :cond_end
-
-    :sym_visible
-    const/16 v3, 0x8
-
-    invoke-virtual {v1, v3}, Landroid/view/View;->setVisibility(I)V
-
-    sget v1, Lcom/alexmanzana/bubbleall/R$id;->keyboardRow1:I
-
-    invoke-virtual {v0, v1}, Landroid/view/ViewGroup;->findViewById(I)Landroid/view/View;
-
-    move-result-object v1
+    if-eqz v3, :hide_r1
 
     const/4 v4, 0x0
 
     invoke-virtual {v1, v4}, Landroid/view/View;->setVisibility(I)V
 
+    goto :skip_r1
+
+    :hide_r1
+    const/16 v4, 0x8
+
+    invoke-virtual {v1, v4}, Landroid/view/View;->setVisibility(I)V
+
+    :skip_r1
     sget v1, Lcom/alexmanzana/bubbleall/R$id;->keyboardRow2:I
 
     invoke-virtual {v0, v1}, Landroid/view/ViewGroup;->findViewById(I)Landroid/view/View;
 
     move-result-object v1
 
+    if-eqz v1, :skip_r2
+
+    if-eqz v3, :hide_r2
+
+    const/4 v4, 0x0
+
     invoke-virtual {v1, v4}, Landroid/view/View;->setVisibility(I)V
 
+    goto :skip_r2
+
+    :hide_r2
+    const/16 v4, 0x8
+
+    invoke-virtual {v1, v4}, Landroid/view/View;->setVisibility(I)V
+
+    :skip_r2
     sget v1, Lcom/alexmanzana/bubbleall/R$id;->keyboardRow3:I
 
     invoke-virtual {v0, v1}, Landroid/view/ViewGroup;->findViewById(I)Landroid/view/View;
 
     move-result-object v1
+
+    if-eqz v1, :cond_end
+
+    if-eqz v3, :hide_r3
+
+    const/4 v4, 0x0
+
+    invoke-virtual {v1, v4}, Landroid/view/View;->setVisibility(I)V
+
+    goto :cond_end
+
+    :hide_r3
+    const/16 v4, 0x8
 
     invoke-virtual {v1, v4}, Landroid/view/View;->setVisibility(I)V
 

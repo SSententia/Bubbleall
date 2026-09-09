@@ -322,6 +322,10 @@
 
 .field public static keyboardRow6:I = 0x7f0902b4
 
+.field public static keyboardRow7:I = 0x7f0902b8
+
+.field public static keyboardPreview:I = 0x7f0902b9
+
 .field public static textInternal:I = 0x7f090250
 
 .field public static textItem:I = 0x7f090251

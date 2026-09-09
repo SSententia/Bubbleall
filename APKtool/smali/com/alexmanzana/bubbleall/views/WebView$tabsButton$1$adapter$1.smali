@@ -103,6 +103,10 @@
     .line 224
     invoke-virtual {v0}, Landroid/view/View;->requestFocus()Z
 
+    iget-object p1, p0, Lcom/alexmanzana/bubbleall/views/WebView$tabsButton$1$adapter$1;->this$0:Lcom/alexmanzana/bubbleall/views/WebView;
+
+    invoke-virtual {p1}, Lcom/alexmanzana/bubbleall/views/WebView;->startFieldPoll()V
+
     .line 227
     :cond_0
     iget-object p1, p0, Lcom/alexmanzana/bubbleall/views/WebView$tabsButton$1$adapter$1;->this$0:Lcom/alexmanzana/bubbleall/views/WebView;
@@ -154,6 +158,10 @@
 
     .line 238
     invoke-virtual {p1}, Landroid/view/View;->requestFocus()Z
+
+    iget-object p1, p0, Lcom/alexmanzana/bubbleall/views/WebView$tabsButton$1$adapter$1;->this$0:Lcom/alexmanzana/bubbleall/views/WebView;
+
+    invoke-virtual {p1}, Lcom/alexmanzana/bubbleall/views/WebView;->startFieldPoll()V
 
     :cond_0
     return-void

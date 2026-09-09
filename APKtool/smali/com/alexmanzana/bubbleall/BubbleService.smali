@@ -3390,7 +3390,7 @@
 
     if-eqz v2, :cond_4
 
-    invoke-virtual {v2}, Lcom/alexmanzana/bubbleall/window/PanelManager;->clearFocus()Z
+    invoke-virtual {v2}, Lcom/alexmanzana/bubbleall/window/PanelManager;->clearFocus()V
 
     :cond_4
     return-void
@@ -3682,6 +3682,12 @@
     invoke-interface {v0, v3, v2}, Landroid/view/WindowManager;->updateViewLayout(Landroid/view/View;Landroid/view/ViewGroup$LayoutParams;)V
 
     .line 595
+    # the manager window was just attached; applyAlpha() ran earlier at boot,
+    # when mViewManagerParams did not exist yet - so the opened manager (and
+    # everything in it) rendered at full opacity while the bubble kept the
+    # user's transparency. Re-apply now that the window exists.
+    invoke-direct {p0}, Lcom/alexmanzana/bubbleall/BubbleService;->applyAlpha()V
+
     invoke-direct {p0}, Lcom/alexmanzana/bubbleall/BubbleService;->toTop()V
 
     .line 596

@@ -76,6 +76,10 @@
 # instance fields
 .field public fieldFocused:Z
 
+.field public wasFieldFocused:Z
+
+.field public pollState:I
+
 .field private final addButton:Ljava/lang/Runnable;
 
 .field private currentWeb:I
@@ -1934,8 +1938,8 @@
     .line 97
     invoke-direct {p0}, Lcom/alexmanzana/bubbleall/views/WebView;->finishMenu()V
 
-    # new tab / panel switch: stop polling, hide bar (restarted by start())
-    invoke-virtual {p0}, Lcom/alexmanzana/bubbleall/views/WebView;->stopFieldPoll()V
+    # new tab / panel switch: keep polling, just resync bar visibility
+    invoke-virtual {p0}, Lcom/alexmanzana/bubbleall/views/WebView;->startFieldPoll()V
 
     return-void
 .end method
@@ -2027,7 +2031,7 @@
 .end method
 
 .method private final showKeyboardBar()V
-    .locals 13
+    .locals 14
 
     invoke-direct {p0}, Lcom/alexmanzana/bubbleall/views/WebView;->keyboardBar()Landroid/view/ViewGroup;
 
@@ -2073,6 +2077,17 @@
 
     # mode 1 shows every row, mode 2 only the paste row
     :cond_1
+    # row visibility is only forced when the bar itself is re-shown; while the
+    # bar is already visible (poll resync) the ?123 toggle state must persist
+    invoke-virtual {v0}, Landroid/view/ViewGroup;->getVisibility()I
+
+    move-result v5
+
+    if-nez v5, :cond_force_rows
+
+    return-void
+
+    :cond_force_rows
     invoke-virtual {v0}, Landroid/view/ViewGroup;->getChildCount()I
 
     move-result v5
@@ -2118,7 +2133,16 @@
     goto :goto_1
 
     :cond_t2
-    if-ne v10, v12, :cond_t3
+    sget v13, Lcom/alexmanzana/bubbleall/R$id;->keyboardRow7:I
+
+    if-ne v10, v12, :cond_t4
+
+    const/4 v10, 0x2
+
+    goto :goto_1
+
+    :cond_t4
+    if-ne v10, v13, :cond_t3
 
     const/4 v10, 0x2
 
@@ -2254,7 +2278,7 @@
 .end method
 
 .method public final stopFieldPoll()V
-    .locals 2
+    .locals 3
 
     # stop flag first: an already-pending post becomes a no-op when it fires
     const/4 v0, 0x1
@@ -2277,33 +2301,135 @@
 
     invoke-direct {p0}, Lcom/alexmanzana/bubbleall/views/WebView;->hideKeyboardBar()V
 
+    # clear any bottom padding the visible bar injected into the page
+    invoke-virtual {p0}, Lcom/alexmanzana/bubbleall/views/WebView;->currentTab()Lcom/alexmanzana/bubbleall/views/Web;
+
+    move-result-object v0
+
+    if-eqz v0, :cond_nopad
+
+    const-string v1, "(function(){try{var s=document.scrollingElement;if(s)s.style.paddingBottom='';}catch(x){}})();"
+
+    const/4 v2, 0x0
+
+    invoke-virtual {v0, v1, v2}, Lcom/alexmanzana/bubbleall/views/Web;->evaluateJavascript(Ljava/lang/String;Landroid/webkit/ValueCallback;)V
+
+    :cond_nopad
     return-void
 .end method
 
-.method public final onFieldFocusResult(Z)V
-    .locals 1
+.method public final onFieldFocusResult(I)V
+    .locals 2
 
-    # evaluateJavascript callback; show/hide only on a state flip
+    # keyboard state machine (states come from the poll; the JS digits map
+    # through focusResult so the argument here means: 0 = no editable field,
+    # 1 = editable field focused, 2 = overlay/panel covering the browser).
+    # showKeyboardBar() only fires on the transition into the focused state;
+    # repeated calls (every poll tick) would reset the ?123/shift toggle state.
+    # fieldFocused doubles as "bar currently shown".
+    iput p1, p0, Lcom/alexmanzana/bubbleall/views/WebView;->pollState:I
+
+    const/4 v0, 0x1
+
+    if-ne p1, v0, :cond_notfocus
+
+    # field focused: show the bar on the transition into focus
     iget-boolean v0, p0, Lcom/alexmanzana/bubbleall/views/WebView;->fieldFocused:Z
 
-    if-eq v0, p1, :cond_end
+    if-nez v0, :goto_end
 
-    iput-boolean p1, p0, Lcom/alexmanzana/bubbleall/views/WebView;->fieldFocused:Z
+    const/4 v0, 0x1
 
-    if-eqz p1, :cond_hide
+    iput-boolean v0, p0, Lcom/alexmanzana/bubbleall/views/WebView;->fieldFocused:Z
 
     invoke-direct {p0}, Lcom/alexmanzana/bubbleall/views/WebView;->showKeyboardBar()V
 
     goto :goto_end
 
-    :cond_hide
+    :cond_notfocus
+    # field gone OR overlay open: only hide on a real transition from
+    # "bar shown". While the menu/tab strip is open the page may still
+    # report a focused field (the WebView keeps DOM focus), and swallowing
+    # that report is what makes the bar fail to come back when the browser
+    # panel returns - the poll sees a stale "hidden" state and skips the
+    # transition. So: remember what we had, hide if the bar was actually up.
+    iget-boolean v0, p0, Lcom/alexmanzana/bubbleall/views/WebView;->fieldFocused:Z
+
+    iput-boolean v0, p0, Lcom/alexmanzana/bubbleall/views/WebView;->wasFieldFocused:Z
+
+    const/4 v1, 0x0
+
+    iput-boolean v1, p0, Lcom/alexmanzana/bubbleall/views/WebView;->fieldFocused:Z
+
+    if-eqz v0, :goto_end
+
     invoke-direct {p0}, Lcom/alexmanzana/bubbleall/views/WebView;->hideKeyboardBar()V
 
-    :cond_end
     :goto_end
     return-void
 .end method
 
+.method public final updateKeyboardPreview(Ljava/lang/String;)V
+    .locals 4
+
+    # mirror the focused field's text into the preview line above the bar.
+    # null/empty = nothing to show; the bar must be visible for the line to
+    # be meaningful (it lives inside keyboardBar, so hiding covers it)
+    invoke-direct {p0}, Lcom/alexmanzana/bubbleall/views/WebView;->keyboardBar()Landroid/view/ViewGroup;
+
+    move-result-object v0
+
+    if-eqz v0, :cond_end
+
+    sget v1, Lcom/alexmanzana/bubbleall/R$id;->keyboardPreview:I
+
+    invoke-virtual {v0, v1}, Landroid/view/ViewGroup;->findViewById(I)Landroid/view/View;
+
+    move-result-object v0
+
+    check-cast v0, Landroid/widget/TextView;
+
+    if-eqz v0, :cond_end
+
+    if-eqz p1, :cond_end
+
+    invoke-virtual {p1}, Ljava/lang/String;->length()I
+
+    move-result v1
+
+    if-lez v1, :cond_end
+
+    invoke-virtual {v0, p1}, Landroid/widget/TextView;->setText(Ljava/lang/CharSequence;)V
+
+    :cond_end
+    return-void
+.end method
+
+.method public final dismissKeyboardBar()V
+    .locals 3
+
+    # blur the page so the poll reports "no field" and the bar stays hidden
+    invoke-virtual {p0}, Lcom/alexmanzana/bubbleall/views/WebView;->currentTab()Lcom/alexmanzana/bubbleall/views/Web;
+
+    move-result-object v0
+
+    if-eqz v0, :cond_noblur
+
+    const-string v1, "(function(){try{document.activeElement.blur();}catch(e){}})();"
+
+    const/4 v2, 0x0
+
+    invoke-virtual {v0, v1, v2}, Lcom/alexmanzana/bubbleall/views/Web;->evaluateJavascript(Ljava/lang/String;Landroid/webkit/ValueCallback;)V
+
+    :cond_noblur
+    const/4 v0, 0x0
+
+    iput-boolean v0, p0, Lcom/alexmanzana/bubbleall/views/WebView;->fieldFocused:Z
+
+    invoke-direct {p0}, Lcom/alexmanzana/bubbleall/views/WebView;->hideKeyboardBar()V
+
+    return-void
+.end method
 .method private final registerNetwork()V
     .locals 5
 

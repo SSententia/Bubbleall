@@ -338,6 +338,8 @@
     <id name="keyboardRow4" />
     <id name="keyboardRow5" />
     <id name="keyboardRow6" />
+    <id name="keyboardRow7" />
+    <id name="keyboardPreview" />
     <id name="labeled" />
     <id name="layout" />
     <id name="layoutAdd" />
