@@ -11,7 +11,13 @@ A reverse-engineering workspace for the Android app **BubbleAll** (`com.alexmanz
   - `smali/` → `classes.dex` — **all app classes live here** (`com/alexmanzana/bubbleall/…`): `BubbleService.smali`, `ShortcutActivity.smali`, `MenuActivity.smali`, `Settings*.smali`, etc.
   - `smali_classes2/`, `smali_classes3/` — library code (androidx, google), not app logic.
   - `res/`, `AndroidManifest.xml`, `apktool.yml` (sdkInfo: minSdk 23, targetSdk 34).
-- `tools/` — source of generated smali (`tools/java/…` holds the Java origin of `APKtool/smali/…/utils/LatestImage.smali`) plus `tools/dexcheck.py`.
+- `tools/` — source of generated smali plus `tools/dexcheck.py`.
+  - `tools/java/…` — the Java origin of every generated helper below `APKtool/smali/com/alexmanzana/bubbleall/`:
+    `utils/LatestImage.java` (attach the newest image), `utils/ImageCrop.java` (the crop screen),
+    `views/AttachCropOption.java` (its config row).
+  - `tools/stubs/…` — compile-time-only stubs for classes that live in the APK rather than in
+    `android.jar` (`androidx.core.content.FileProvider`). They are compiled to a separate directory
+    and never dexed, so no stub reaches the APK.
 - `scripts/` — `gen-helper.sh` (Java → smali) and `build-apk.sh` (build, check, sign, optionally install).
 - `JADX/` — **JADX "export as Gradle project" output. Read-only reference only.**
   - `app/src/main/java/com/alexmanzana/bubbleall/*.java` — decompiled Java/Kotlin source, 1:1 correspondence with the smali files above.
@@ -33,7 +39,10 @@ A reverse-engineering workspace for the Android app **BubbleAll** (`com.alexmanz
   build with it: the first install needs an uninstall (signature differs from the Play build), but
   every rebuild after that is a plain `install -r` that **keeps app settings**. The old flow of
   signing off-machine (an on-device "apk-signer" app) is no longer necessary.
-- Generate the helper smali after editing its Java: `bash scripts/gen-helper.sh`.
+- Regenerate the helper smali after editing any helper Java: `bash scripts/gen-helper.sh`. It
+  compiles every file under `tools/java` (and `tools/stubs`), dexes them together and copies
+  **every** generated `.smali` — including the nested `ImageCrop$Root`/`$Click`/`$CropLayer` files —
+  into `APKtool/smali`, then stop hand-editing those files: the next run overwrites them.
 - JADX tree has no working build/test/lint commands.
 
 ## Gotchas
@@ -68,6 +77,21 @@ A reverse-engineering workspace for the Android app **BubbleAll** (`com.alexmanz
   `shell`, or line endings are mangled), and a missing row returns a "No item at …" error of fixed
   size, which is a handy way to find the highest existing id. Note this Android's `content` command
   has **no `query` subcommand**.
+- **The crop screen is a third overlay window, not an activity.** `ImageCrop` adds its own
+  `TYPE_APPLICATION_OVERLAY` window through the WebView's context (which is the service) and answers
+  the pending `ValueCallback<Uri[]>` itself, so nothing depends on a background-activity-start
+  exemption. It can never leave an upload button dead: if the window cannot be shown, `show()`
+  returns false and `LatestImage` attaches the newest image the old way. Read the decision in logcat
+  with `adb logcat -s BubbleUpload` — the line now carries `crop=true|false`.
+- **The crop screen's opacity is deliberately split.** The photo is drawn by the window at alpha 1
+  while the shade, marquee, handles and button bar follow `theme_alpha` (floored at 0.25 so the
+  screen stays operable at full transparency). Setting window-level alpha — the way
+  `BubbleService.applyAlpha()` does for the bubble and manager windows — would fade the photo too.
+- **Cropped uploads go out through the app's FileProvider.** `ImageCrop` writes to
+  `getCacheDir()` and shares it with `FileProvider.getUriForFile(..., "com.alexmanzana.bubbleall.fileprovider", ...)`;
+  the provider's `<cache-path name="cache" path="."/>` already covers that directory, and the
+  WebView reads it without an explicit grant because it is the same app. The preference that turns
+  the screen on is `crop_before_attach` (boolean, default **true**) in `bubble_data_prefs`.
 - **JADX output is reference-only** — never edit it expecting changes to land in the APK; edit smali instead.
 - Hardcoded resource IDs in smali are re-linked by apktool on rebuild, but keep `R$*.smali` files intact.
 - Modifying/redistributing a commercial app violates its license; keep changes for personal use.

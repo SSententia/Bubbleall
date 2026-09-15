@@ -12,6 +12,7 @@ import android.webkit.ValueCallback;
 import android.webkit.WebChromeClient;
 import android.webkit.WebView;
 import android.widget.Toast;
+import com.alexmanzana.bubbleall.views.AttachCropOption;
 import java.util.Locale;
 
 /**
@@ -22,6 +23,11 @@ import java.util.Locale;
  * AI Studio were silently dropped: Chromium asked the app for a file and the default no-op
  * answered nothing. {@link #handle} answers them with the newest image in the gallery instead of
  * showing a picker, so a single tap on "upload" really does upload.
+ *
+ * <p>When the "Crop before attaching" row in the bubble config is on (the default), the newest
+ * image is handed to {@link ImageCrop} first: a full-screen crop screen answers the file chooser
+ * with the cropped region instead. Any failure there falls back to attaching the whole image, so
+ * a broken crop screen can never turn an upload button dead again.
  *
  * <p>This source is the origin of {@code APKtool/smali/com/alexmanzana/bubbleall/utils/LatestImage.smali};
  * regenerate with {@code scripts/gen-helper.sh} rather than editing the smali by hand.
@@ -57,6 +63,7 @@ public final class LatestImage {
         }
         boolean answered = false;
         boolean imageWanted = false;
+        boolean cropping = false;
         int mode = -1;
         Uri result = null;
         try {
@@ -70,26 +77,33 @@ public final class LatestImage {
                 return false;
             }
             answered = true;
-            if (hasImagePermission(context)) {
-                result = newestImage(context);
-            } else {
+            if (!hasImagePermission(context)) {
                 toast(context, TEXT_NEED_PERMISSION);
+            } else {
+                Newest newest = newestImage(context);
+                if (newest != null && AttachCropOption.enabled(context)
+                        && ImageCrop.show(context, newest.uri, callback, newest.orientation)) {
+                    cropping = true;             // the crop screen owns the callback from here on
+                } else {
+                    result = newest == null ? null : newest.uri;
+                }
             }
         } catch (Throwable ignored) {
             answered = true;                         // the callback must never be left dangling
         }
-        log(mode, imageWanted, answered, result);
-        if (answered) {
+        log(mode, imageWanted, answered, cropping, result);
+        if (answered && !cropping) {
             deliver(callback, result);
         }
         return answered;
     }
 
     /** Single line of evidence in logcat: adb logcat -s BubbleUpload */
-    private static void log(int mode, boolean imageWanted, boolean answered, Uri uri) {
+    private static void log(int mode, boolean imageWanted, boolean answered, boolean cropping,
+                            Uri uri) {
         try {
             Log.i(TAG, "file chooser: mode=" + mode + " image=" + imageWanted
-                    + " handled=" + answered + " uri=" + uri);
+                    + " handled=" + answered + " crop=" + cropping + " uri=" + uri);
         } catch (Throwable ignored) {
         }
     }
@@ -149,10 +163,22 @@ public final class LatestImage {
         return false;
     }
 
+    /** The newest gallery image, with the rotation MediaStore recorded for it. */
+    private static final class Newest {
+        final Uri uri;
+        final int orientation;
+
+        Newest(Uri uri, int orientation) {
+            this.uri = uri;
+            this.orientation = orientation;
+        }
+    }
+
     /** Newest row in MediaStore.Images -- screenshots, camera shots and downloads alike. */
-    private static Uri newestImage(Context context) {
+    private static Newest newestImage(Context context) {
         Uri base = MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
         Cursor cursor = null;
+        long id = 0L;
         try {
             cursor = context.getContentResolver().query(
                     base,
@@ -161,21 +187,49 @@ public final class LatestImage {
                     null,
                     MediaStore.Images.Media._ID + " DESC");
             if (cursor != null && cursor.moveToFirst()) {
-                long id = cursor.getLong(0);
-                if (id > 0L) {
-                    return ContentUris.withAppendedId(base, id);
-                }
+                id = cursor.getLong(0);
             }
         } catch (Throwable ignored) {
         } finally {
-            if (cursor != null) {
-                try {
-                    cursor.close();
-                } catch (Throwable ignored) {
-                }
+            close(cursor);
+        }
+        if (id <= 0L) {
+            return null;
+        }
+        Uri uri = ContentUris.withAppendedId(base, id);
+        return new Newest(uri, orientationOf(context, uri));
+    }
+
+    /**
+     * MediaStore's recorded rotation for one image, queried separately: a missing or unreadable
+     * ORIENTATION column must not be able to break finding the image itself.
+     */
+    private static int orientationOf(Context context, Uri uri) {
+        Cursor cursor = null;
+        try {
+            cursor = context.getContentResolver().query(
+                    uri,
+                    new String[]{MediaStore.Images.Media.ORIENTATION},
+                    null,
+                    null,
+                    null);
+            if (cursor != null && cursor.moveToFirst() && !cursor.isNull(0)) {
+                return cursor.getInt(0);
+            }
+        } catch (Throwable ignored) {
+        } finally {
+            close(cursor);
+        }
+        return 0;
+    }
+
+    private static void close(Cursor cursor) {
+        if (cursor != null) {
+            try {
+                cursor.close();
+            } catch (Throwable ignored) {
             }
         }
-        return null;
     }
 
     private static void deliver(ValueCallback<Uri[]> callback, Uri uri) {

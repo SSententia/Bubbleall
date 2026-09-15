@@ -326,6 +326,16 @@
 
 .field public static keyboardPreview:I = 0x7f0902b9
 
+.field public static cropAttach:I = 0x7f0902ba
+
+.field public static cropAttachTitle:I = 0x7f0902bb
+
+.field public static cropAttachDesc:I = 0x7f0902bc
+
+.field public static cropAttachImage:I = 0x7f0902bd
+
+.field public static cropAttachState:I = 0x7f0902be
+
 .field public static textInternal:I = 0x7f090250
 
 .field public static textItem:I = 0x7f090251

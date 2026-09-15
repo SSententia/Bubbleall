@@ -51,5 +51,16 @@
                 <ImageView android:id="@id/restartBubbleImage" android:layout_width="24.0dp" android:layout_height="24.0dp" android:src="@drawable/ic_baseline_refresh_24" android:layout_centerInParent="true" android:contentDescription="@string/app_name" app:tint="#4d4d4d" />
             </RelativeLayout>
         </RelativeLayout>
+        <View android:background="#cccccc" android:layout_width="wrap_content" android:layout_height="1.0dp" />
+        <RelativeLayout android:padding="15.0dp" android:layout_width="match_parent" android:layout_height="wrap_content">
+            <LinearLayout android:orientation="vertical" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_centerInParent="true" android:layout_marginStart="5.0dp" android:layout_marginEnd="10.0dp" android:layout_toStartOf="@id/cropAttach" android:layout_alignParentStart="true">
+                <TextView android:textSize="16.0sp" android:textColor="@color/colorPrimaryText" android:ellipsize="end" android:id="@+id/cropAttachTitle" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/text_crop_attach" android:maxLines="1" android:lines="1" android:minLines="1" />
+                <TextView android:textSize="13.0sp" android:textColor="@color/colorSecondText" android:ellipsize="end" android:id="@+id/cropAttachDesc" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/text_crop_attach_d" android:maxLines="2" android:minLines="1" />
+            </LinearLayout>
+            <RelativeLayout android:id="@id/cropAttach" android:background="@drawable/background_item_color" android:layout_width="50.0dp" android:layout_height="50.0dp" android:layout_marginEnd="5.0dp" android:layout_centerInParent="true" android:layout_alignParentEnd="true">
+                <ImageView android:id="@+id/cropAttachImage" android:layout_width="22.0dp" android:layout_height="22.0dp" android:layout_centerHorizontal="true" android:layout_marginTop="4.0dp" android:src="@drawable/ic_baseline_crop_24" android:contentDescription="@string/app_name" app:tint="#4d4d4d" />
+                <TextView android:textSize="9.0sp" android:textColor="@color/colorPrimaryText" android:id="@+id/cropAttachState" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_alignParentBottom="true" android:layout_centerHorizontal="true" android:layout_marginBottom="3.0dp" android:text="@string/v7_preference_on" android:maxLines="1" />
+            </RelativeLayout>
+        </RelativeLayout>
     </LinearLayout>
 </ScrollView>

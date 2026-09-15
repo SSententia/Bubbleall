@@ -687,6 +687,92 @@
 
     invoke-virtual {v7, v8}, Landroid/view/View;->setOnClickListener(Landroid/view/View$OnClickListener;)V
 
+    # crop-before-attaching row: theme tint on its texts and icon (v6 = saved Context)
+    sget v7, Lcom/alexmanzana/bubbleall/R$id;->cropAttachTitle:I
+
+    invoke-virtual {p0, v7}, Lcom/alexmanzana/bubbleall/views/AddView;->findViewById(I)Landroid/view/View;
+
+    move-result-object v7
+
+    check-cast v7, Landroid/widget/TextView;
+
+    sget-object v8, Lcom/alexmanzana/bubbleall/utils/BubblePrefs;->Companion:Lcom/alexmanzana/bubbleall/utils/BubblePrefs$Companion;
+
+    invoke-virtual {v8, v6}, Lcom/alexmanzana/bubbleall/utils/BubblePrefs$Companion;->getInternalColors(Landroid/content/Context;)I
+
+    move-result v8
+
+    invoke-virtual {v7, v8}, Landroid/widget/TextView;->setTextColor(I)V
+
+    sget v7, Lcom/alexmanzana/bubbleall/R$id;->cropAttachDesc:I
+
+    invoke-virtual {p0, v7}, Lcom/alexmanzana/bubbleall/views/AddView;->findViewById(I)Landroid/view/View;
+
+    move-result-object v7
+
+    check-cast v7, Landroid/widget/TextView;
+
+    sget-object v8, Lcom/alexmanzana/bubbleall/utils/BubblePrefs;->Companion:Lcom/alexmanzana/bubbleall/utils/BubblePrefs$Companion;
+
+    invoke-virtual {v8, v6}, Lcom/alexmanzana/bubbleall/utils/BubblePrefs$Companion;->getInternalColors(Landroid/content/Context;)I
+
+    move-result v8
+
+    invoke-virtual {v7, v8}, Landroid/widget/TextView;->setTextColor(I)V
+
+    sget v7, Lcom/alexmanzana/bubbleall/R$id;->cropAttachState:I
+
+    invoke-virtual {p0, v7}, Lcom/alexmanzana/bubbleall/views/AddView;->findViewById(I)Landroid/view/View;
+
+    move-result-object v7
+
+    check-cast v7, Landroid/widget/TextView;
+
+    sget-object v8, Lcom/alexmanzana/bubbleall/utils/BubblePrefs;->Companion:Lcom/alexmanzana/bubbleall/utils/BubblePrefs$Companion;
+
+    invoke-virtual {v8, v6}, Lcom/alexmanzana/bubbleall/utils/BubblePrefs$Companion;->getInternalColors(Landroid/content/Context;)I
+
+    move-result v8
+
+    invoke-virtual {v7, v8}, Landroid/widget/TextView;->setTextColor(I)V
+
+    sget v7, Lcom/alexmanzana/bubbleall/R$id;->cropAttachImage:I
+
+    invoke-virtual {p0, v7}, Lcom/alexmanzana/bubbleall/views/AddView;->findViewById(I)Landroid/view/View;
+
+    move-result-object v7
+
+    check-cast v7, Landroid/widget/ImageView;
+
+    sget-object v8, Lcom/alexmanzana/bubbleall/utils/BubblePrefs;->Companion:Lcom/alexmanzana/bubbleall/utils/BubblePrefs$Companion;
+
+    invoke-virtual {v8, v6}, Lcom/alexmanzana/bubbleall/utils/BubblePrefs$Companion;->getInternalColors(Landroid/content/Context;)I
+
+    move-result v8
+
+    invoke-virtual {v7, v8}, Landroid/widget/ImageView;->setColorFilter(I)V
+
+    # the toggle itself: button and state label in v7/v8, then the app's plain and current item
+    # backgrounds. All five registers are contiguous and start at the saved Context (v6) so the
+    # assembler sizes this method's outs from the list (see the outs trap in knowledge.md).
+    sget v7, Lcom/alexmanzana/bubbleall/R$id;->cropAttach:I
+
+    invoke-virtual {p0, v7}, Lcom/alexmanzana/bubbleall/views/AddView;->findViewById(I)Landroid/view/View;
+
+    move-result-object v7
+
+    sget v8, Lcom/alexmanzana/bubbleall/R$id;->cropAttachState:I
+
+    invoke-virtual {p0, v8}, Lcom/alexmanzana/bubbleall/views/AddView;->findViewById(I)Landroid/view/View;
+
+    move-result-object v8
+
+    sget v9, Lcom/alexmanzana/bubbleall/R$drawable;->background_item_color:I
+
+    sget v10, Lcom/alexmanzana/bubbleall/R$drawable;->background_item_color_current:I
+
+    invoke-static {v6, v7, v8, v9, v10}, Lcom/alexmanzana/bubbleall/views/AttachCropOption;->bind(Landroid/content/Context;Landroid/view/View;Landroid/view/View;II)V
+
     .line 80
 
     :goto_1

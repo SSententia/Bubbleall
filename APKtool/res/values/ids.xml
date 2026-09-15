@@ -340,6 +340,11 @@
     <id name="keyboardRow6" />
     <id name="keyboardRow7" />
     <id name="keyboardPreview" />
+    <id name="cropAttach" />
+    <id name="cropAttachTitle" />
+    <id name="cropAttachDesc" />
+    <id name="cropAttachImage" />
+    <id name="cropAttachState" />
     <id name="labeled" />
     <id name="layout" />
     <id name="layoutAdd" />
