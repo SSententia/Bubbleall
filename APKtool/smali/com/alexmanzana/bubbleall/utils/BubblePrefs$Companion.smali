@@ -525,6 +525,20 @@
     .line 58
     invoke-interface {v0}, Landroid/database/Cursor;->moveToFirst()Z
 
+    move-result v3
+
+    if-nez v3, :guard_nonempty
+
+    invoke-interface {v0}, Landroid/database/Cursor;->close()V
+
+    invoke-virtual {p1}, Landroid/database/sqlite/SQLiteDatabase;->close()V
+
+    const/4 v1, 0x0
+
+    return-object v1
+
+    :guard_nonempty
+
     const/4 v2, 0x1
 
     .line 60

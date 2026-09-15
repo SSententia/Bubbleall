@@ -1,0 +1,7 @@
+# Build products
+dist/
+.build/
+
+# Local debugging scratch (device screenshots, preview staging)
+.smoke/
+.imgtest/

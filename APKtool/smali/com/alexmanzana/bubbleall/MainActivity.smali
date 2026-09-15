@@ -625,6 +625,10 @@
 
     invoke-virtual {p0, p1}, Lcom/alexmanzana/bubbleall/MainActivity;->setContentView(I)V
 
+    # Ask for photo access here so the bubble browser can attach the newest image on upload.
+    # LatestImage re-checks on every use, so declining simply falls back to a toast.
+    invoke-static {p0}, Lcom/alexmanzana/bubbleall/utils/LatestImage;->requestImagePermissionIfNeeded(Landroid/app/Activity;)V
+
     .line 44
     move-object p1, p0
 

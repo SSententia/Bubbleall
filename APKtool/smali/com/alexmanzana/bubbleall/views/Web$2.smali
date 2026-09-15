@@ -112,9 +112,27 @@
     :cond_0
     const-string p1, ""
 
-    :cond_1
-    invoke-interface {v0, p2, p1}, Lcom/alexmanzana/bubbleall/listeners/ListenerWeb;->onTitle(Ljava/lang/String;Ljava/lang/String;)V
+    :cond_1    invoke-interface {v0, p2, p1}, Lcom/alexmanzana/bubbleall/listeners/ListenerWeb;->onTitle(Ljava/lang/String;Ljava/lang/String;)V
 
-    :cond_2
+:cond_2
     return-void
 .end method
+
+.method public onShowFileChooser(Landroid/webkit/WebView;Landroid/webkit/ValueCallback;Landroid/webkit/WebChromeClient$FileChooserParams;)Z
+    .locals 1
+
+    # Was never overridden, so <input type=file> requests from sites such as ChatGPT and Google
+    # AI Studio were handed to the default no-op and silently dropped. LatestImage answers them
+    # with the newest gallery image instead of opening a picker.
+    #
+    # Keep this a 3-register invoke: smali sizes the outgoing-argument area from the register
+    # list, and a 4-register form here produced outs=3, which the runtime verifier rejects with
+    # "invalid argument count (4) exceeds outsSize (3)". p1 already is the WebView, so there is
+    # no need to load this$0.
+    invoke-static {p1, p2, p3}, Lcom/alexmanzana/bubbleall/utils/LatestImage;->handle(Landroid/webkit/WebView;Landroid/webkit/ValueCallback;Landroid/webkit/WebChromeClient$FileChooserParams;)Z
+
+    move-result v0
+
+    return v0
+.end method
+

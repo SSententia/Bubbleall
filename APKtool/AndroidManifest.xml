@@ -7,8 +7,10 @@
     <uses-permission android:maxSdkVersion="32" android:name="android.permission.READ_EXTERNAL_STORAGE"/>
     <uses-permission android:name="android.permission.READ_MEDIA_AUDIO"/>
     <uses-permission android:name="android.permission.READ_MEDIA_VIDEO"/>
+    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES"/>
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW"/>
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE"/>
     <uses-permission android:name="com.android.vending.BILLING"/>
     <queries>
         <intent>
@@ -41,7 +43,9 @@
         <provider android:authorities="com.alexmanzana.bubbleall.fileprovider" android:exported="false" android:grantUriPermissions="true" android:name="androidx.core.content.FileProvider">
             <meta-data android:name="android.support.FILE_PROVIDER_PATHS" android:resource="@xml/file_provider_paths"/>
         </provider>
-        <service android:foregroundServiceType="shortService" android:name="com.alexmanzana.bubbleall.BubbleService"/>
+        <service android:foregroundServiceType="specialUse" android:name="com.alexmanzana.bubbleall.BubbleService">
+            <property android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE" android:value="floating_overlay_bubble"/>
+        </service>
         <activity android:name="com.alexmanzana.bubbleall.SettingsActivity"/>
         <activity android:name="com.alexmanzana.bubbleall.BubbleColorActivity"/>
         <activity android:name="com.alexmanzana.bubbleall.ThemeActivity"/>
