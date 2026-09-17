@@ -13,7 +13,7 @@ ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 SDK="D:/X/Programs/ASDK"
 BT="$SDK/build-tools/35.0.0"
 ADB="$SDK/platform-tools/adb.exe"
-APKTOOL_JAR="C:/Windows/apktool_3.0.2.jar"
+APKTOOL_JAR="C:/Windows/apktool_3.0.3.jar"
 KEYSTORE="C:/Users/Pankaekz/.android/debug.keystore"
 KEY_ALIAS="androiddebugkey"
 PACKAGE="com.alexmanzana.bubbleall"
@@ -44,6 +44,15 @@ for name in [n for n in z.namelist() if n.endswith('.dex')]:
 "
 python "$ROOT/tools/dexcheck.py" .build/classes.dex .build/classes2.dex .build/classes3.dex \
   || { echo "refusing to sign: a class would VerifyError at runtime" >&2; exit 1; }
+
+# The other hand-editing failure mode: a call site naming a class, method or field that does not
+# exist, or whose descriptor does not match. That assembles fine and throws NoSuchMethodError or
+# NoSuchFieldError the first time the code path runs, so check every reference before signing.
+echo "== reference check =="
+bash "$ROOT/tools/refcheck_selftest.sh"
+python "$ROOT/tools/refcheck.py" "$ROOT/APKtool/smali" "$ROOT/APKtool/smali_classes2" \
+  "$ROOT/APKtool/smali_classes3" \
+  || { echo "refusing to sign: an unresolved smali reference would fail at runtime" >&2; exit 1; }
 
 echo "== zipalign =="
 "$BT/zipalign.exe" -f -p 4 "$DIST/bubbleall-unsigned.apk" "$DIST/bubbleall-aligned.apk"

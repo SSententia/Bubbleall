@@ -13,6 +13,9 @@ import android.webkit.WebChromeClient;
 import android.webkit.WebView;
 import android.widget.Toast;
 import com.alexmanzana.bubbleall.views.AttachCropOption;
+import com.alexmanzana.bubbleall.views.PickGalleryOption;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 
 /**
@@ -21,21 +24,33 @@ import java.util.Locale;
  * <p>Web$2 -- the WebChromeClient installed on every {@code views.Web} -- never overrode
  * onShowFileChooser, so {@code <input type=file>} requests from sites such as ChatGPT or Google
  * AI Studio were silently dropped: Chromium asked the app for a file and the default no-op
- * answered nothing. {@link #handle} answers them with the newest image in the gallery instead of
- * showing a picker, so a single tap on "upload" really does upload.
+ * answered nothing. {@link #handle} answers them instead, two ways, chosen by the bubble config:
  *
- * <p>When the "Crop before attaching" row in the bubble config is on (the default), the newest
- * image is handed to {@link ImageCrop} first: a full-screen crop screen answers the file chooser
- * with the cropped region instead. Any failure there falls back to attaching the whole image, so
- * a broken crop screen can never turn an upload button dead again.
+ * <ul>
+ *   <li><b>Pick from gallery off</b> (the default): the newest image in the gallery is attached
+ *       immediately, no picker. With "Crop before attaching" on, it goes through
+ *       {@link ImageCrop} first.
+ *   <li><b>Pick from gallery on</b>: {@link ImagePicker} shows the recent images so the user
+ *       chooses. Every chosen image is cropped in turn when "Crop before attaching" is on, and
+ *       the whole selection is then handed to the site in a single answer, because a page reads
+ *       its file list from one {@code onReceiveValue} call. Whether several can be picked is the
+ *       page's call: a file field that accepts more than one file
+ *       ({@link #MODE_OPEN_MULTIPLE}) gets multi-select, a plain one gets single-select.
+ * </ul>
  *
- * <p>This source is the origin of {@code APKtool/smali/com/alexmanzana/bubbleall/utils/LatestImage.smali};
+ * <p>Any failure falls back to attaching the whole image, so a broken screen can never turn an
+ * upload button dead again.
+ *
+ * <p>This source is the origin of {@code APKtool/smali/com/alexmanzana/bubbleall/utils/LatestImage*.smali};
  * regenerate with {@code scripts/gen-helper.sh} rather than editing the smali by hand.
  */
 public final class LatestImage {
 
     /** WebChromeClient.FileChooserParams.MODE_SAVE */
     private static final int MODE_SAVE = 3;
+
+    /** WebChromeClient.FileChooserParams.MODE_OPEN_MULTIPLE: the input has {@code multiple}. */
+    private static final int MODE_OPEN_MULTIPLE = 2;
 
     private static final int REQUEST_CODE = 8811;
     private static final int PERMISSION_GRANTED = 0;
@@ -61,11 +76,13 @@ public final class LatestImage {
         if (view == null || callback == null || params == null) {
             return false;
         }
-        boolean answered = false;
         boolean imageWanted = false;
+        boolean picker = false;
         boolean cropping = false;
         int mode = -1;
-        Uri result = null;
+        Uri newest = null;
+        Batch batch = null;
+        boolean owned = false;                       // the batch owns the callback from here on
         try {
             mode = params.getMode();
             imageWanted = wantsImage(params);
@@ -76,34 +93,49 @@ public final class LatestImage {
             if (context == null) {
                 return false;
             }
-            answered = true;
             if (!hasImagePermission(context)) {
                 toast(context, TEXT_NEED_PERMISSION);
             } else {
-                Newest newest = newestImage(context);
-                if (newest != null && AttachCropOption.enabled(context)
-                        && ImageCrop.show(context, newest.uri, callback, newest.orientation)) {
-                    cropping = true;             // the crop screen owns the callback from here on
+                batch = new Batch(context, callback);
+                if (PickGalleryOption.enabled(context)) {
+                    picker = ImagePicker.show(context, batch, mode == MODE_OPEN_MULTIPLE);
+                    if (!picker) {
+                        // an empty gallery, or a picker that could not open: answer cleanly
+                        batch.onPicked(null);
+                    }
                 } else {
-                    result = newest == null ? null : newest.uri;
+                    Newest found = newestImage(context);
+                    newest = found == null ? null : found.uri;
+                    if (found == null) {
+                        batch.onPicked(null);
+                    } else {
+                        batch.attachNewest(found.uri, found.orientation);
+                        cropping = batch.deferred();  // the crop screen answers later
+                    }
                 }
+                owned = true;
             }
-        } catch (Throwable ignored) {
-            answered = true;                         // the callback must never be left dangling
+        } catch (Throwable failure) {
+            Log.w(TAG, "file chooser could not be answered: " + failure);
         }
-        log(mode, imageWanted, answered, cropping, result);
-        if (answered && !cropping) {
-            deliver(callback, result);
+        if (!owned) {
+            if (batch != null) {
+                batch.onPicked(null);
+            } else {
+                deliver(callback, null);             // the callback must never be left dangling
+            }
         }
-        return answered;
+        log(mode, imageWanted, owned, picker, cropping, newest);
+        return true;
     }
 
     /** Single line of evidence in logcat: adb logcat -s BubbleUpload */
-    private static void log(int mode, boolean imageWanted, boolean answered, boolean cropping,
-                            Uri uri) {
+    private static void log(int mode, boolean imageWanted, boolean handled, boolean picker,
+                            boolean cropping, Uri uri) {
         try {
             Log.i(TAG, "file chooser: mode=" + mode + " image=" + imageWanted
-                    + " handled=" + answered + " crop=" + cropping + " uri=" + uri);
+                    + " handled=" + handled + " picker=" + picker + " crop=" + cropping
+                    + " uri=" + uri);
         } catch (Throwable ignored) {
         }
     }
@@ -247,6 +279,130 @@ public final class LatestImage {
         try {
             Toast.makeText(context, text, Toast.LENGTH_LONG).show();
         } catch (Throwable ignored) {
+        }
+    }
+
+    /**
+     * Answers one file-chooser request, with one image or with several.
+     *
+     * <p>Both routes -- the newest image and a gallery selection -- end up here, and this is the
+     * only place that reports back to the WebView. When "Crop before attaching" is on, the images
+     * are cropped one after another: each crop screen shows a single picked image, the ones
+     * already cropped are held, and the whole set is handed over in one answer at the end.
+     *
+     * <p>Cancelling any one crop screen cancels the whole attach. Half a selection arriving at the
+     * site would be worse than none of it, and the answer is all-or-nothing anyway: a WebView file
+     * chooser can only be answered once.
+     */
+    private static final class Batch implements ImageCrop.Sink, ImagePicker.Sink {
+
+        private final Context context;
+        private final ValueCallback<Uri[]> callback;
+        private final boolean crop;
+
+        private List<ImagePicker.Pick> picks;
+        private Uri[] results;
+        private int index;
+        private boolean settled;
+
+        Batch(Context context, ValueCallback<Uri[]> callback) {
+            this.context = context;
+            this.callback = callback;
+            this.crop = AttachCropOption.enabled(context);
+        }
+
+        /** One image and no picker: the newest-image route, reported exactly like a selection. */
+        void attachNewest(Uri uri, int orientation) {
+            if (uri == null) {
+                settle(null);
+                return;
+            }
+            ArrayList<ImagePicker.Pick> one = new ArrayList<ImagePicker.Pick>();
+            one.add(new ImagePicker.Pick(uri, orientation));
+            start(one);
+        }
+
+        @Override
+        public void onPicked(List<ImagePicker.Pick> selection) {
+            if (selection == null || selection.isEmpty()) {
+                settle(null);
+                return;
+            }
+            start(selection);
+        }
+
+        /** True while a crop screen is showing, i.e. the answer comes back later. */
+        boolean deferred() {
+            return !settled;
+        }
+
+        private void start(List<ImagePicker.Pick> selection) {
+            picks = selection;
+            results = new Uri[selection.size()];
+            index = 0;
+            advance();
+        }
+
+        /** Crops the next image, or reports the batch when there is nothing left to crop. */
+        private void advance() {
+            if (settled) {
+                return;
+            }
+            while (index < picks.size()) {
+                ImagePicker.Pick pick = picks.get(index);
+                if (crop && ImageCrop.show(context, pick.uri, this, pick.orientation)) {
+                    return;                          // the crop screen answers for this image
+                }
+                results[index] = pick.uri;           // no crop: attach the original bytes
+                index++;
+            }
+            settle(results);
+        }
+
+        @Override
+        public void onResult(Uri uri) {
+            if (settled) {
+                return;
+            }
+            if (uri == null) {
+                Log.i(TAG, "crop cancelled: the whole attach is dropped");
+                settle(null);
+                return;
+            }
+            results[index] = uri;
+            index++;
+            advance();
+        }
+
+        /** Delivers the selection, or a clean cancel. Only the first call has any effect. */
+        private void settle(Uri[] answer) {
+            if (settled) {
+                return;
+            }
+            settled = true;
+            Uri[] value = answer;
+            if (value != null) {
+                ArrayList<Uri> kept = new ArrayList<Uri>(value.length);
+                for (int i = 0; i < value.length; i++) {
+                    if (value[i] != null) {
+                        kept.add(value[i]);
+                    }
+                }
+                if (kept.isEmpty()) {
+                    value = null;
+                } else if (kept.size() != value.length) {
+                    value = kept.toArray(new Uri[kept.size()]);
+                }
+            }
+            Log.i(TAG, value == null
+                    ? "file chooser: answered with no file"
+                    : "file chooser: answered with " + value.length + " image(s)"
+                            + (crop ? ", cropped" : ", as picked"));
+            try {
+                callback.onReceiveValue(value);
+            } catch (Throwable failure) {
+                Log.w(TAG, "the file chooser callback refused the images: " + failure);
+            }
         }
     }
 }

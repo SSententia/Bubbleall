@@ -5,3 +5,6 @@ dist/
 # Local debugging scratch (device screenshots, preview staging)
 .smoke/
 .imgtest/
+
+# Python tooling scratch (tools/*.py imported during experiments)
+__pycache__/

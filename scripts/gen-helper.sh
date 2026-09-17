@@ -3,7 +3,7 @@
 #
 # The smali tree is what apktool assembles, but the Java sources are far easier to reason about,
 # so the Java is the origin and this script produces the smali: javac -> d8 -> baksmali.
-# baksmali's CLI is not shipped inside apktool 3.0.2, hence the tiny DecodeDex driver.
+# baksmali's CLI is not shipped inside apktool, hence the tiny DecodeDex driver.
 #
 #   tools/java/com/alexmanzana/bubbleall/...   the sources (one package tree, mirroring the app)
 #   tools/stubs/androidx/...                   compile-time-only stubs, never dexed
@@ -19,7 +19,7 @@ JDK="D:/X/Programs/JDK 21/jbr-21.0.11"
 SDK="D:/X/Programs/ASDK"
 BT="$SDK/build-tools/35.0.0"
 ANDROID_JAR="$SDK/platforms/android-35/android.jar"
-APKTOOL_JAR="C:/Windows/apktool_3.0.2.jar"   # Windows form: it ends up inside a ;-joined -cp
+APKTOOL_JAR="C:/Windows/apktool_3.0.3.jar"   # Windows form: it ends up inside a ;-joined -cp
 
 # The JVM is a Windows binary, so anything embedded in a classpath must be a Windows path.
 winpath() { cygpath -w "$1" 2>/dev/null || echo "$1"; }
@@ -49,13 +49,15 @@ if [ -d "$STUBS" ]; then
   STUB_SOURCES=$(find "$STUBS" -name '*.java' || true)
   if [ -n "$STUB_SOURCES" ]; then
     echo "== javac (compile-time stubs; not dexed) =="
-    "$JAVAC" -nowarn -source 8 -target 8 -classpath "$ANDROID_JAR" \
+    "$JAVAC" -nowarn -encoding UTF-8 -source 8 -target 8 -classpath "$ANDROID_JAR" \
       -d "$WORK/stubclasses" $STUB_SOURCES
   fi
 fi
 
 echo "== javac (helpers, against android.jar) =="
-"$JAVAC" -nowarn -source 8 -target 8 \
+# -encoding UTF-8 is not optional: javac otherwise reads the source in the platform charset
+# (Cp1252 here), and a non-ASCII string literal such as the crop screen's ellipsis ships mangled.
+"$JAVAC" -nowarn -encoding UTF-8 -source 8 -target 8 \
   -classpath "$ANDROID_JAR;$(winpath "$WORK/stubclasses")" \
   -d "$WORK/classes" $SOURCES
 
@@ -82,6 +84,28 @@ z.close()
 
 COUNT="$(find "$WORK/smali" -name '*.smali' | wc -l)"
 [ "$COUNT" -gt 0 ] || { echo "no smali produced" >&2; exit 1; }
+
+# Everything this script owns is regenerated wholesale, so a class that disappears from the Java
+# (a renamed or removed inner class) must not be left behind: a stale ImageCrop$Old.smali still
+# calling a method that no longer exists assembles fine and then fails the runtime verifier.
+# Only files named exactly like a generated top-level class, or one of its $inner classes, are
+# deleted -- the app's own classes in the same packages (AddView, Web, ...) never match.
+echo "== drop previously generated classes =="
+CLEARED=0
+while IFS= read -r rel; do
+  dir="$(dirname "$rel")"
+  base="$(basename "$rel")"
+  top="${base%%\$*}"
+  top="${top%.smali}"
+  target="$DEST/$dir"
+  [ -d "$target" ] || continue
+  for stale in "$target/$top.smali" "$target/$top"\$*.smali; do
+    [ -e "$stale" ] || continue
+    rm -f "$stale"
+    CLEARED=$((CLEARED + 1))
+  done
+done < <(find "$WORK/smali" -name '*.smali' | sed "s|^$WORK/smali/||")
+echo "   removed $CLEARED stale file(s)"
 
 # The generated tree holds only this project's own helper packages, so copying it over APKtool's
 # smali tree replaces exactly the files this script owns and nothing else.

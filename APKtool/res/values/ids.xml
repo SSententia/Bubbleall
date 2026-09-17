@@ -345,6 +345,11 @@
     <id name="cropAttachDesc" />
     <id name="cropAttachImage" />
     <id name="cropAttachState" />
+    <id name="pickGallery" />
+    <id name="pickGalleryTitle" />
+    <id name="pickGalleryDesc" />
+    <id name="pickGalleryImage" />
+    <id name="pickGalleryState" />
     <id name="labeled" />
     <id name="layout" />
     <id name="layoutAdd" />

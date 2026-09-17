@@ -271,7 +271,9 @@ Thanks!"</string>
     <string name="text_general">General</string>
     <string name="text_go_position">Go to position</string>
     <string name="text_crop_attach">Crop before attaching</string>
-    <string name="text_crop_attach_d">Crop the newest image before uploading it</string>
+    <string name="text_crop_attach_d">Crop each image before uploading it</string>
+    <string name="text_pick_gallery">Pick from gallery</string>
+    <string name="text_pick_gallery_d">Choose which images to attach instead of the newest one</string>
     <string name="text_keyboard_builtin">Built-in</string>
     <string name="text_keyboard_mode">Keyboard in browser</string>
     <string name="text_keyboard_mode_d">What to show when you tap a field</string>

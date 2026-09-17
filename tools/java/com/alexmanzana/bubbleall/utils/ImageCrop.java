@@ -22,7 +22,6 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
-import android.webkit.ValueCallback;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -50,14 +49,21 @@ import java.io.OutputStream;
  * the status bar (dragging a handle from the very top edge pulls the notification shade down).
  *
  * <p>The screen is a {@code TYPE_APPLICATION_OVERLAY} window added next to the bubble and manager
- * windows, so it needs no activity and no background-activity-start exemption. It answers the
- * WebView's file chooser itself: the cropped region is written to the app cache and handed to the
- * pending {@link ValueCallback} as a {@code content://} URI from the app's FileProvider.
+ * windows, so it needs no activity and no background-activity-start exemption. Its answer goes to
+ * a {@link Sink}: the cropped region is written to the app cache and handed back as a
+ * {@code content://} URI from the app's FileProvider, or as {@code null} when the user cancelled.
+ * Keeping the answer independent of the WebView is what lets {@link LatestImage} run one crop for
+ * a single image and one crop per picked image on the way to a multi-file attach.
  *
  * <p>This source is the origin of {@code APKtool/smali/com/alexmanzana/bubbleall/utils/ImageCrop*.smali};
  * regenerate with {@code scripts/gen-helper.sh} rather than editing the smali by hand.
  */
 public final class ImageCrop {
+
+    /** Where a completed -- or cancelled -- crop goes. {@code null} means the user cancelled. */
+    public interface Sink {
+        void onResult(Uri uri);
+    }
 
     private static final String TAG = "BubbleUpload";
 
@@ -93,7 +99,7 @@ public final class ImageCrop {
 
     private final Context context;
     private final Uri source;
-    private final ValueCallback<Uri[]> callback;
+    private final Sink sink;
     private final int orientation;
     private final WindowManager windowManager;
     private final CropLayer layer;
@@ -104,10 +110,10 @@ public final class ImageCrop {
     private Bitmap bitmap;
     private boolean finished;
 
-    private ImageCrop(Context context, Uri source, ValueCallback<Uri[]> callback, int orientation) {
+    private ImageCrop(Context context, Uri source, Sink sink, int orientation) {
         this.context = context;
         this.source = source;
-        this.callback = callback;
+        this.sink = sink;
         this.orientation = orientation;
         this.windowManager = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
 
@@ -127,20 +133,19 @@ public final class ImageCrop {
     }
 
     /**
-     * Opens the crop screen over everything else and returns true when it owns [callback] from now
-     * on. Returns false — without touching the callback — when the screen cannot be shown, so the
-     * caller can fall back to attaching the image as it is.
+     * Opens the crop screen over everything else and returns true when it owns [sink] from now on.
+     * Returns false — without touching the sink — when the screen cannot be shown, so the caller
+     * can fall back to attaching the image as it is.
      *
      * @param orientation the MediaStore ORIENTATION of the row, applied to the decoded bitmap
      */
-    public static boolean show(Context context, Uri source, ValueCallback<Uri[]> callback,
-                               int orientation) {
+    public static boolean show(Context context, Uri source, Sink sink, int orientation) {
         try {
-            if (context == null || source == null || callback == null) {
+            if (context == null || source == null || sink == null) {
                 return false;
             }
-            cancelCurrent();
-            ImageCrop screen = new ImageCrop(context, source, callback, orientation);
+            dismissCurrent();
+            ImageCrop screen = new ImageCrop(context, source, sink, orientation);
             screen.attach();
             current = screen;
             screen.load();
@@ -151,8 +156,12 @@ public final class ImageCrop {
         }
     }
 
-    /** Cancels a crop screen that is still waiting for the user (the earlier upload is dropped). */
-    private static void cancelCurrent() {
+    /**
+     * Cancels a crop screen that is still waiting for the user (the earlier upload is dropped).
+     * Also the guard against two overlay screens stacking: both the next upload and the gallery
+     * picker call it before showing a screen of their own.
+     */
+    public static void dismissCurrent() {
         ImageCrop open = current;
         if (open != null) {
             open.finish(null);
@@ -416,9 +425,9 @@ public final class ImageCrop {
         }
         layer.setBitmap(null);
         try {
-            callback.onReceiveValue(result == null ? null : new Uri[]{result});
+            sink.onResult(result);
         } catch (Throwable failure) {
-            Log.w(TAG, "file chooser callback refused the result: " + failure);
+            Log.w(TAG, "the result sink refused the crop: " + failure);
         }
     }
 

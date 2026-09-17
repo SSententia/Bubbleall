@@ -6,6 +6,7 @@
 # annotations
 .annotation system Ldalvik/annotation/MemberClasses;
     value = {
+        Lcom/alexmanzana/bubbleall/utils/LatestImage$Batch;,
         Lcom/alexmanzana/bubbleall/utils/LatestImage$Newest;
     }
 .end annotation
@@ -13,6 +14,8 @@
 
 # static fields
 .field private static final IMAGE_EXTENSIONS:[Ljava/lang/String;
+
+.field private static final MODE_OPEN_MULTIPLE:I = 0x2
 
 .field private static final MODE_SAVE:I = 0x3
 
@@ -137,7 +140,7 @@
 .end method
 
 .method public static handle(Landroid/webkit/WebView;Landroid/webkit/ValueCallback;Landroid/webkit/WebChromeClient$FileChooserParams;)Z
-    .locals 7
+    .locals 17
     .annotation system Ldalvik/annotation/Signature;
         value = {
             "(",
@@ -151,15 +154,17 @@
         }
     .end annotation
 
-    const/4 v0, 0x0
+    move-object/from16 v1, p1
 
-    if-eqz p0, :cond_8
+    const/4 v2, 0x0
 
-    if-eqz p1, :cond_8
+    if-eqz p0, :cond_c
+
+    if-eqz v1, :cond_c
 
     if-nez p2, :cond_0
 
-    goto :goto_5
+    goto/16 :goto_c
 
     :cond_0
     nop
@@ -172,135 +177,303 @@
 
     nop
 
-    const/4 v1, 0x1
+    nop
 
-    const/4 v2, 0x0
+    nop
+
+    const/4 v3, 0x1
+
+    const/4 v4, 0x0
 
     :try_start_0
-    invoke-virtual {p2}, Landroid/webkit/WebChromeClient$FileChooserParams;->getMode()I
+    invoke-virtual/range {p2 .. p2}, Landroid/webkit/WebChromeClient$FileChooserParams;->getMode()I
 
-    move-result v3
+    move-result v5
     :try_end_0
-    .catchall {:try_start_0 .. :try_end_0} :catchall_2
+    .catchall {:try_start_0 .. :try_end_0} :catchall_5
 
     :try_start_1
-    invoke-static {p2}, Lcom/alexmanzana/bubbleall/utils/LatestImage;->wantsImage(Landroid/webkit/WebChromeClient$FileChooserParams;)Z
+    invoke-static/range {p2 .. p2}, Lcom/alexmanzana/bubbleall/utils/LatestImage;->wantsImage(Landroid/webkit/WebChromeClient$FileChooserParams;)Z
 
-    move-result p2
+    move-result v6
     :try_end_1
-    .catchall {:try_start_1 .. :try_end_1} :catchall_1
+    .catchall {:try_start_1 .. :try_end_1} :catchall_4
 
-    const/4 v4, 0x3
+    const/4 v0, 0x3
 
-    if-eq v3, v4, :cond_6
+    if-eq v5, v0, :cond_9
 
-    if-nez p2, :cond_1
+    if-nez v6, :cond_1
 
-    goto :goto_1
+    goto/16 :goto_6
 
     :cond_1
     :try_start_2
-    invoke-virtual {p0}, Landroid/webkit/WebView;->getContext()Landroid/content/Context;
+    invoke-virtual/range {p0 .. p0}, Landroid/webkit/WebView;->getContext()Landroid/content/Context;
 
-    move-result-object p0
+    move-result-object v0
 
-    if-nez p0, :cond_2
+    if-nez v0, :cond_2
 
-    return v0
+    return v2
 
     :cond_2
-    nop
+    invoke-static {v0}, Lcom/alexmanzana/bubbleall/utils/LatestImage;->hasImagePermission(Landroid/content/Context;)Z
 
-    invoke-static {p0}, Lcom/alexmanzana/bubbleall/utils/LatestImage;->hasImagePermission(Landroid/content/Context;)Z
+    move-result v7
 
-    move-result v4
+    if-nez v7, :cond_3
 
-    if-nez v4, :cond_3
+    const-string v7, "Allow photo access to BubbleAll to attach images"
 
-    const-string v4, "Allow photo access to BubbleAll to attach images"
+    invoke-static {v0, v7}, Lcom/alexmanzana/bubbleall/utils/LatestImage;->toast(Landroid/content/Context;Ljava/lang/String;)V
 
-    invoke-static {p0, v4}, Lcom/alexmanzana/bubbleall/utils/LatestImage;->toast(Landroid/content/Context;Ljava/lang/String;)V
+    move v0, v2
 
-    goto :goto_0
+    move v7, v0
+
+    move-object v8, v4
+
+    move-object v9, v8
+
+    goto :goto_4
 
     :cond_3
-    invoke-static {p0}, Lcom/alexmanzana/bubbleall/utils/LatestImage;->newestImage(Landroid/content/Context;)Lcom/alexmanzana/bubbleall/utils/LatestImage$Newest;
+    new-instance v7, Lcom/alexmanzana/bubbleall/utils/LatestImage$Batch;
 
-    move-result-object v4
+    invoke-direct {v7, v0, v1}, Lcom/alexmanzana/bubbleall/utils/LatestImage$Batch;-><init>(Landroid/content/Context;Landroid/webkit/ValueCallback;)V
+    :try_end_2
+    .catchall {:try_start_2 .. :try_end_2} :catchall_3
 
-    if-eqz v4, :cond_4
+    :try_start_3
+    invoke-static {v0}, Lcom/alexmanzana/bubbleall/views/PickGalleryOption;->enabled(Landroid/content/Context;)Z
 
-    invoke-static {p0}, Lcom/alexmanzana/bubbleall/views/AttachCropOption;->enabled(Landroid/content/Context;)Z
+    move-result v8
 
-    move-result v5
+    if-eqz v8, :cond_6
 
-    if-eqz v5, :cond_4
+    const/4 v8, 0x2
 
-    iget-object v5, v4, Lcom/alexmanzana/bubbleall/utils/LatestImage$Newest;->uri:Landroid/net/Uri;
+    if-ne v5, v8, :cond_4
 
-    iget v6, v4, Lcom/alexmanzana/bubbleall/utils/LatestImage$Newest;->orientation:I
-
-    invoke-static {p0, v5, p1, v6}, Lcom/alexmanzana/bubbleall/utils/ImageCrop;->show(Landroid/content/Context;Landroid/net/Uri;Landroid/webkit/ValueCallback;I)Z
-
-    move-result p0
-
-    if-eqz p0, :cond_4
-
-    move v0, v1
+    move v8, v3
 
     goto :goto_0
 
     :cond_4
-    if-nez v4, :cond_5
-
-    goto :goto_0
-
-    :cond_5
-    iget-object v2, v4, Lcom/alexmanzana/bubbleall/utils/LatestImage$Newest;->uri:Landroid/net/Uri;
-    :try_end_2
-    .catchall {:try_start_2 .. :try_end_2} :catchall_0
+    move v8, v2
 
     :goto_0
-    goto :goto_4
+    invoke-static {v0, v7, v8}, Lcom/alexmanzana/bubbleall/utils/ImagePicker;->show(Landroid/content/Context;Lcom/alexmanzana/bubbleall/utils/ImagePicker$Sink;Z)Z
+
+    move-result v8
+    :try_end_3
+    .catchall {:try_start_3 .. :try_end_3} :catchall_2
+
+    if-nez v8, :cond_5
+
+    :try_start_4
+    invoke-virtual {v7, v4}, Lcom/alexmanzana/bubbleall/utils/LatestImage$Batch;->onPicked(Ljava/util/List;)V
+    :try_end_4
+    .catchall {:try_start_4 .. :try_end_4} :catchall_0
+
+    goto :goto_1
 
     :catchall_0
-    move-exception p0
+    move-exception v0
+
+    move-object v9, v0
+
+    goto :goto_5
+
+    :cond_5
+    :goto_1
+    move v0, v2
+
+    move v2, v8
+
+    move-object v8, v4
 
     goto :goto_3
 
     :cond_6
-    :goto_1
-    return v0
+    :try_start_5
+    invoke-static {v0}, Lcom/alexmanzana/bubbleall/utils/LatestImage;->newestImage(Landroid/content/Context;)Lcom/alexmanzana/bubbleall/utils/LatestImage$Newest;
 
-    :catchall_1
-    move-exception p0
-
-    goto :goto_2
-
-    :catchall_2
-    move-exception p0
-
-    const/4 v3, -0x1
-
-    :goto_2
-    move p2, v0
-
-    :goto_3
-    nop
-
-    :goto_4
-    invoke-static {v3, p2, v1, v0, v2}, Lcom/alexmanzana/bubbleall/utils/LatestImage;->log(IZZZLandroid/net/Uri;)V
+    move-result-object v0
 
     if-nez v0, :cond_7
 
-    invoke-static {p1, v2}, Lcom/alexmanzana/bubbleall/utils/LatestImage;->deliver(Landroid/webkit/ValueCallback;Landroid/net/Uri;)V
+    move-object v8, v4
+
+    goto :goto_2
 
     :cond_7
-    return v1
+    iget-object v8, v0, Lcom/alexmanzana/bubbleall/utils/LatestImage$Newest;->uri:Landroid/net/Uri;
+    :try_end_5
+    .catchall {:try_start_5 .. :try_end_5} :catchall_2
+
+    :goto_2
+    if-nez v0, :cond_8
+
+    :try_start_6
+    invoke-virtual {v7, v4}, Lcom/alexmanzana/bubbleall/utils/LatestImage$Batch;->onPicked(Ljava/util/List;)V
+
+    move v0, v2
+
+    goto :goto_3
 
     :cond_8
+    iget-object v9, v0, Lcom/alexmanzana/bubbleall/utils/LatestImage$Newest;->uri:Landroid/net/Uri;
+
+    iget v0, v0, Lcom/alexmanzana/bubbleall/utils/LatestImage$Newest;->orientation:I
+
+    invoke-virtual {v7, v9, v0}, Lcom/alexmanzana/bubbleall/utils/LatestImage$Batch;->attachNewest(Landroid/net/Uri;I)V
+
+    invoke-virtual {v7}, Lcom/alexmanzana/bubbleall/utils/LatestImage$Batch;->deferred()Z
+
+    move-result v0
+    :try_end_6
+    .catchall {:try_start_6 .. :try_end_6} :catchall_1
+
+    :goto_3
+    move-object v9, v8
+
+    move-object v8, v7
+
+    move v7, v3
+
+    :goto_4
+    move v15, v0
+
+    move v14, v2
+
+    move v11, v5
+
+    move v12, v6
+
+    move v13, v7
+
+    move-object/from16 v16, v9
+
+    goto :goto_a
+
+    :catchall_1
+    move-exception v0
+
+    move-object v9, v0
+
+    move-object v0, v8
+
+    move v8, v2
+
+    goto :goto_9
+
+    :catchall_2
+    move-exception v0
+
+    move-object v9, v0
+
+    move v8, v2
+
     :goto_5
-    return v0
+    move-object v0, v4
+
+    goto :goto_9
+
+    :catchall_3
+    move-exception v0
+
+    move-object v9, v0
+
+    move v8, v2
+
+    goto :goto_8
+
+    :cond_9
+    :goto_6
+    return v2
+
+    :catchall_4
+    move-exception v0
+
+    goto :goto_7
+
+    :catchall_5
+    move-exception v0
+
+    const/4 v5, -0x1
+
+    :goto_7
+    move-object v9, v0
+
+    move v6, v2
+
+    move v8, v6
+
+    :goto_8
+    move-object v0, v4
+
+    move-object v7, v0
+
+    :goto_9
+    new-instance v10, Ljava/lang/StringBuilder;
+
+    invoke-direct {v10}, Ljava/lang/StringBuilder;-><init>()V
+
+    const-string v11, "file chooser could not be answered: "
+
+    invoke-virtual {v10, v11}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
+
+    move-result-object v10
+
+    invoke-virtual {v10, v9}, Ljava/lang/StringBuilder;->append(Ljava/lang/Object;)Ljava/lang/StringBuilder;
+
+    move-result-object v9
+
+    invoke-virtual {v9}, Ljava/lang/StringBuilder;->toString()Ljava/lang/String;
+
+    move-result-object v9
+
+    const-string v10, "BubbleUpload"
+
+    invoke-static {v10, v9}, Landroid/util/Log;->w(Ljava/lang/String;Ljava/lang/String;)I
+
+    move-object/from16 v16, v0
+
+    move v13, v2
+
+    move v15, v13
+
+    move v11, v5
+
+    move v12, v6
+
+    move v14, v8
+
+    move-object v8, v7
+
+    :goto_a
+    if-nez v13, :cond_b
+
+    if-eqz v8, :cond_a
+
+    invoke-virtual {v8, v4}, Lcom/alexmanzana/bubbleall/utils/LatestImage$Batch;->onPicked(Ljava/util/List;)V
+
+    goto :goto_b
+
+    :cond_a
+    invoke-static {v1, v4}, Lcom/alexmanzana/bubbleall/utils/LatestImage;->deliver(Landroid/webkit/ValueCallback;Landroid/net/Uri;)V
+
+    :cond_b
+    :goto_b
+    invoke-static/range {v11 .. v16}, Lcom/alexmanzana/bubbleall/utils/LatestImage;->log(IZZZZLandroid/net/Uri;)V
+
+    return v3
+
+    :cond_c
+    :goto_c
+    return v2
 .end method
 
 .method private static hasImagePermission(Landroid/content/Context;)Z
@@ -352,7 +525,7 @@
     return-object v0
 .end method
 
-.method private static log(IZZZLandroid/net/Uri;)V
+.method private static log(IZZZZLandroid/net/Uri;)V
     .locals 3
 
     :try_start_0
@@ -392,7 +565,7 @@
 
     move-result-object p0
 
-    const-string p1, " crop="
+    const-string p1, " picker="
 
     invoke-virtual {p0, p1}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
 
@@ -402,13 +575,23 @@
 
     move-result-object p0
 
+    const-string p1, " crop="
+
+    invoke-virtual {p0, p1}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
+
+    move-result-object p0
+
+    invoke-virtual {p0, p4}, Ljava/lang/StringBuilder;->append(Z)Ljava/lang/StringBuilder;
+
+    move-result-object p0
+
     const-string p1, " uri="
 
     invoke-virtual {p0, p1}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
 
     move-result-object p0
 
-    invoke-virtual {p0, p4}, Ljava/lang/StringBuilder;->append(Ljava/lang/Object;)Ljava/lang/StringBuilder;
+    invoke-virtual {p0, p5}, Ljava/lang/StringBuilder;->append(Ljava/lang/Object;)Ljava/lang/StringBuilder;
 
     move-result-object p0
 

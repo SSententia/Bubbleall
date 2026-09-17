@@ -336,6 +336,16 @@
 
 .field public static cropAttachState:I = 0x7f0902be
 
+.field public static pickGallery:I = 0x7f0902bf
+
+.field public static pickGalleryTitle:I = 0x7f0902c0
+
+.field public static pickGalleryDesc:I = 0x7f0902c1
+
+.field public static pickGalleryImage:I = 0x7f0902c2
+
+.field public static pickGalleryState:I = 0x7f0902c3
+
 .field public static textInternal:I = 0x7f090250
 
 .field public static textItem:I = 0x7f090251

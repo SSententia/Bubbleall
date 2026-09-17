@@ -6,6 +6,7 @@
 # annotations
 .annotation system Ldalvik/annotation/MemberClasses;
     value = {
+        Lcom/alexmanzana/bubbleall/utils/ImageCrop$Sink;,
         Lcom/alexmanzana/bubbleall/utils/ImageCrop$CropLayer;,
         Lcom/alexmanzana/bubbleall/utils/ImageCrop$Root;,
         Lcom/alexmanzana/bubbleall/utils/ImageCrop$Click;,
@@ -49,17 +50,6 @@
 # instance fields
 .field private bitmap:Landroid/graphics/Bitmap;
 
-.field private final callback:Landroid/webkit/ValueCallback;
-    .annotation system Ldalvik/annotation/Signature;
-        value = {
-            "Landroid/webkit/ValueCallback<",
-            "[",
-            "Landroid/net/Uri;",
-            ">;"
-        }
-    .end annotation
-.end field
-
 .field private final context:Landroid/content/Context;
 
 .field private finished:Z
@@ -74,25 +64,16 @@
 
 .field private final root:Lcom/alexmanzana/bubbleall/utils/ImageCrop$Root;
 
+.field private final sink:Lcom/alexmanzana/bubbleall/utils/ImageCrop$Sink;
+
 .field private final source:Landroid/net/Uri;
 
 .field private final windowManager:Landroid/view/WindowManager;
 
 
 # direct methods
-.method private constructor <init>(Landroid/content/Context;Landroid/net/Uri;Landroid/webkit/ValueCallback;I)V
+.method private constructor <init>(Landroid/content/Context;Landroid/net/Uri;Lcom/alexmanzana/bubbleall/utils/ImageCrop$Sink;I)V
     .locals 2
-    .annotation system Ldalvik/annotation/Signature;
-        value = {
-            "(",
-            "Landroid/content/Context;",
-            "Landroid/net/Uri;",
-            "Landroid/webkit/ValueCallback<",
-            "[",
-            "Landroid/net/Uri;",
-            ">;I)V"
-        }
-    .end annotation
 
     invoke-direct {p0}, Ljava/lang/Object;-><init>()V
 
@@ -110,7 +91,7 @@
 
     iput-object p2, p0, Lcom/alexmanzana/bubbleall/utils/ImageCrop;->source:Landroid/net/Uri;
 
-    iput-object p3, p0, Lcom/alexmanzana/bubbleall/utils/ImageCrop;->callback:Landroid/webkit/ValueCallback;
+    iput-object p3, p0, Lcom/alexmanzana/bubbleall/utils/ImageCrop;->sink:Lcom/alexmanzana/bubbleall/utils/ImageCrop$Sink;
 
     iput p4, p0, Lcom/alexmanzana/bubbleall/utils/ImageCrop;->orientation:I
 
@@ -396,21 +377,6 @@
     invoke-virtual {v0, v1}, Landroid/widget/TextView;->setLayoutParams(Landroid/view/ViewGroup$LayoutParams;)V
 
     return-object v0
-.end method
-
-.method private static cancelCurrent()V
-    .locals 2
-
-    sget-object v0, Lcom/alexmanzana/bubbleall/utils/ImageCrop;->current:Lcom/alexmanzana/bubbleall/utils/ImageCrop;
-
-    if-eqz v0, :cond_0
-
-    const/4 v1, 0x0
-
-    invoke-direct {v0, v1}, Lcom/alexmanzana/bubbleall/utils/ImageCrop;->finish(Landroid/net/Uri;)V
-
-    :cond_0
-    return-void
 .end method
 
 .method private static chromeAlpha(Landroid/content/Context;)F
@@ -764,6 +730,21 @@
     return-void
 .end method
 
+.method public static dismissCurrent()V
+    .locals 2
+
+    sget-object v0, Lcom/alexmanzana/bubbleall/utils/ImageCrop;->current:Lcom/alexmanzana/bubbleall/utils/ImageCrop;
+
+    if-eqz v0, :cond_0
+
+    const/4 v1, 0x0
+
+    invoke-direct {v0, v1}, Lcom/alexmanzana/bubbleall/utils/ImageCrop;->finish(Landroid/net/Uri;)V
+
+    :cond_0
+    return-void
+.end method
+
 .method private dp(I)I
     .locals 1
 
@@ -791,7 +772,7 @@
 .end method
 
 .method private finish(Landroid/net/Uri;)V
-    .locals 3
+    .locals 2
 
     iget-boolean v0, p0, Lcom/alexmanzana/bubbleall/utils/ImageCrop;->finished:Z
 
@@ -804,55 +785,40 @@
 
     iput-boolean v0, p0, Lcom/alexmanzana/bubbleall/utils/ImageCrop;->finished:Z
 
-    sget-object v1, Lcom/alexmanzana/bubbleall/utils/ImageCrop;->current:Lcom/alexmanzana/bubbleall/utils/ImageCrop;
+    sget-object v0, Lcom/alexmanzana/bubbleall/utils/ImageCrop;->current:Lcom/alexmanzana/bubbleall/utils/ImageCrop;
 
-    const/4 v2, 0x0
+    const/4 v1, 0x0
 
-    if-ne v1, p0, :cond_1
+    if-ne v0, p0, :cond_1
 
-    sput-object v2, Lcom/alexmanzana/bubbleall/utils/ImageCrop;->current:Lcom/alexmanzana/bubbleall/utils/ImageCrop;
+    sput-object v1, Lcom/alexmanzana/bubbleall/utils/ImageCrop;->current:Lcom/alexmanzana/bubbleall/utils/ImageCrop;
 
     :cond_1
     invoke-direct {p0}, Lcom/alexmanzana/bubbleall/utils/ImageCrop;->detach()V
 
-    iget-object v1, p0, Lcom/alexmanzana/bubbleall/utils/ImageCrop;->bitmap:Landroid/graphics/Bitmap;
+    iget-object v0, p0, Lcom/alexmanzana/bubbleall/utils/ImageCrop;->bitmap:Landroid/graphics/Bitmap;
 
-    if-eqz v1, :cond_2
+    if-eqz v0, :cond_2
 
-    iget-object v1, p0, Lcom/alexmanzana/bubbleall/utils/ImageCrop;->bitmap:Landroid/graphics/Bitmap;
+    iget-object v0, p0, Lcom/alexmanzana/bubbleall/utils/ImageCrop;->bitmap:Landroid/graphics/Bitmap;
 
-    invoke-virtual {v1}, Landroid/graphics/Bitmap;->recycle()V
+    invoke-virtual {v0}, Landroid/graphics/Bitmap;->recycle()V
 
-    iput-object v2, p0, Lcom/alexmanzana/bubbleall/utils/ImageCrop;->bitmap:Landroid/graphics/Bitmap;
+    iput-object v1, p0, Lcom/alexmanzana/bubbleall/utils/ImageCrop;->bitmap:Landroid/graphics/Bitmap;
 
     :cond_2
-    iget-object v1, p0, Lcom/alexmanzana/bubbleall/utils/ImageCrop;->layer:Lcom/alexmanzana/bubbleall/utils/ImageCrop$CropLayer;
+    iget-object v0, p0, Lcom/alexmanzana/bubbleall/utils/ImageCrop;->layer:Lcom/alexmanzana/bubbleall/utils/ImageCrop$CropLayer;
 
-    invoke-virtual {v1, v2}, Lcom/alexmanzana/bubbleall/utils/ImageCrop$CropLayer;->setBitmap(Landroid/graphics/Bitmap;)V
+    invoke-virtual {v0, v1}, Lcom/alexmanzana/bubbleall/utils/ImageCrop$CropLayer;->setBitmap(Landroid/graphics/Bitmap;)V
 
     :try_start_0
-    iget-object v1, p0, Lcom/alexmanzana/bubbleall/utils/ImageCrop;->callback:Landroid/webkit/ValueCallback;
+    iget-object v0, p0, Lcom/alexmanzana/bubbleall/utils/ImageCrop;->sink:Lcom/alexmanzana/bubbleall/utils/ImageCrop$Sink;
 
-    if-nez p1, :cond_3
-
-    :goto_0
-    goto :goto_1
-
-    :cond_3
-    new-array v2, v0, [Landroid/net/Uri;
-
-    const/4 v0, 0x0
-
-    aput-object p1, v2, v0
-
-    goto :goto_0
-
-    :goto_1
-    invoke-interface {v1, v2}, Landroid/webkit/ValueCallback;->onReceiveValue(Ljava/lang/Object;)V
+    invoke-interface {v0, p1}, Lcom/alexmanzana/bubbleall/utils/ImageCrop$Sink;->onResult(Landroid/net/Uri;)V
     :try_end_0
     .catchall {:try_start_0 .. :try_end_0} :catchall_0
 
-    goto :goto_2
+    goto :goto_0
 
     :catchall_0
     move-exception p1
@@ -861,7 +827,7 @@
 
     invoke-direct {v0}, Ljava/lang/StringBuilder;-><init>()V
 
-    const-string v1, "file chooser callback refused the result: "
+    const-string v1, "the result sink refused the crop: "
 
     invoke-virtual {v0, v1}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
 
@@ -879,7 +845,7 @@
 
     invoke-static {v0, p1}, Landroid/util/Log;->w(Ljava/lang/String;Ljava/lang/String;)I
 
-    :goto_2
+    :goto_0
     return-void
 .end method
 
@@ -1504,19 +1470,8 @@
     throw p2
 .end method
 
-.method public static show(Landroid/content/Context;Landroid/net/Uri;Landroid/webkit/ValueCallback;I)Z
+.method public static show(Landroid/content/Context;Landroid/net/Uri;Lcom/alexmanzana/bubbleall/utils/ImageCrop$Sink;I)Z
     .locals 2
-    .annotation system Ldalvik/annotation/Signature;
-        value = {
-            "(",
-            "Landroid/content/Context;",
-            "Landroid/net/Uri;",
-            "Landroid/webkit/ValueCallback<",
-            "[",
-            "Landroid/net/Uri;",
-            ">;I)Z"
-        }
-    .end annotation
 
     const/4 v0, 0x0
 
@@ -1530,11 +1485,11 @@
 
     :cond_0
     :try_start_0
-    invoke-static {}, Lcom/alexmanzana/bubbleall/utils/ImageCrop;->cancelCurrent()V
+    invoke-static {}, Lcom/alexmanzana/bubbleall/utils/ImageCrop;->dismissCurrent()V
 
     new-instance v1, Lcom/alexmanzana/bubbleall/utils/ImageCrop;
 
-    invoke-direct {v1, p0, p1, p2, p3}, Lcom/alexmanzana/bubbleall/utils/ImageCrop;-><init>(Landroid/content/Context;Landroid/net/Uri;Landroid/webkit/ValueCallback;I)V
+    invoke-direct {v1, p0, p1, p2, p3}, Lcom/alexmanzana/bubbleall/utils/ImageCrop;-><init>(Landroid/content/Context;Landroid/net/Uri;Lcom/alexmanzana/bubbleall/utils/ImageCrop$Sink;I)V
 
     invoke-direct {v1}, Lcom/alexmanzana/bubbleall/utils/ImageCrop;->attach()V
 

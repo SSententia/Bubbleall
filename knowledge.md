@@ -92,6 +92,40 @@ A reverse-engineering workspace for the Android app **BubbleAll** (`com.alexmanz
   the provider's `<cache-path name="cache" path="."/>` already covers that directory, and the
   WebView reads it without an explicit grant because it is the same app. The preference that turns
   the screen on is `crop_before_attach` (boolean, default **true**) in `bubble_data_prefs`.
+- **The gallery picker is a fourth overlay window.** `ImagePicker` (shown when `pick_from_gallery`
+  is true in `bubble_data_prefs`, default **false**) is built the same way as the crop screen: a
+  `TYPE_APPLICATION_OVERLAY` window, no activity, no `onActivityResult`. The page's own
+  `FileChooserParams.getMode()` decides single vs multi (`MODE_OPEN_MULTIPLE` = 2), so a file input
+  without `multiple` gets single-select instead of silently losing extra picks. Several images are
+  answered in **one** `onReceiveValue(Uri[])` — a WebView file chooser can only be answered once —
+  and because of that a crop cancelled mid-batch cancels the whole attach (all-or-nothing). Read the
+  flow in logcat: `file chooser: ... picker=true`, `picker: opened on N image(s), multiple=...`,
+  `picker: picked N image(s)`, one `crop ...` line per image, then `answered with N image(s), cropped`.
+- **Picker thumbnails are windowed, not Glide.** Glide is bundled and would be the easy answer, but
+  a helper class can only use it through hand-written stubs, and a descriptor that does not match
+  the bundled version fails on the device with `NoSuchMethodError`. Instead the grid is a `ScrollView`
+  of fixed-size cells and one worker decodes only the rows on screen ±1, recycling as they leave
+  (`ContentResolver.loadThumbnail` on API 29+, downsampled file read below). Grid geometry therefore
+  has to stay uniform: cell size and gap are what make "which rows are visible" computable.
+- **Two checkers now guard hand-written smali, and both are self-tested.** `tools/dexcheck.py` catches
+  an invoke that exceeds its method's `outs` (the `VerifyError` of September). `tools/refcheck.py`
+  catches the *other* silent killer: a call site whose class, name, descriptor or field type does not
+  match anything in the tree (`NoSuchMethodError` / `NoSuchFieldError` at first run). Both are wired
+  into `scripts/build-apk.sh`; `refcheck` runs a self-test first, because a checker that never fires
+  is indistinguishable from one that works. That self-test exists for a reason: `refcheck.py` was
+  **vacuous twice** while being written — CRLF line endings defeated every line-anchored pattern, and
+  `java.lang.Object`, which no dex dump contains, made every class chain look unknowable. Both bugs
+  printed a confident "0 unresolvable references". Misses *into* bundled library stubs (android,
+  androidx, kotlin) are reported but never fatal: those dumps are partial, so they say nothing about
+  this project's code.
+- **`gen-helper.sh` deletes the classes it owns before regenerating them.** Copying the new smali
+  over the old tree leaves a stale `Foo$Old.smali` behind when an inner class is renamed or removed,
+  and stale smali referencing a method that no longer exists assembles fine and fails at runtime.
+- **`javac` needs `-encoding UTF-8` here** (it is on both invocations in `gen-helper.sh`). The default
+  is the platform charset, Cp1252 on this machine, so a non-ASCII string literal — the crop screen's
+  ellipsis — is read as mojibake and ships that way.
+- **apktool on this machine is 3.0.3** (`C:/Windows/apktool_3.0.3.jar`); both scripts point at it.
+  baksmali still has no CLI inside apktool, hence `tools/dex2smali/DecodeDex.java`.
 - **JADX output is reference-only** — never edit it expecting changes to land in the APK; edit smali instead.
 - Hardcoded resource IDs in smali are re-linked by apktool on rebuild, but keep `R$*.smali` files intact.
 - Modifying/redistributing a commercial app violates its license; keep changes for personal use.
